@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, firebaseConfigError } from '@/lib/firebase';
 import { login as authLogin, logout as authLogout, register as authRegister, RegisterData, LoginData } from './auth-service';
 import { getUserByEmail } from '@/lib/services/user.service';
 import { FirestoreUser } from '@/types/firestore';
@@ -58,6 +58,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = async (data: LoginData) => {
+    // Check Firebase configuration before attempting login
+    if (firebaseConfigError.hasError) {
+      const errorMessage = `${firebaseConfigError.message}\n\n${firebaseConfigError.helpText}`;
+      setError(errorMessage);
+      setLoading(false);
+      throw new Error(errorMessage);
+    }
+
     try {
       setError(null);
       setLoading(true);
@@ -75,6 +83,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   const register = async (data: RegisterData) => {
+    // Check Firebase configuration before attempting registration
+    if (firebaseConfigError.hasError) {
+      const errorMessage = `${firebaseConfigError.message}\n\n${firebaseConfigError.helpText}`;
+      setError(errorMessage);
+      setLoading(false);
+      throw new Error(errorMessage);
+    }
+
     try {
       setError(null);
       setLoading(true);
