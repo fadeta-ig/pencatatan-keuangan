@@ -85,7 +85,7 @@ export default function RegisterPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {displayError && (
             <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-800">{displayError}</div>
+              <div className="text-sm text-red-800 whitespace-pre-wrap">{displayError}</div>
             </div>
           )}
 
