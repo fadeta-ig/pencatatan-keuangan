@@ -74,13 +74,13 @@ This guide will help you set up Firebase Firestore for the Pencatatan Keuangan a
 
 ### Step 3: Configure Environment Variables
 
-Create a `.env` file in the project root (copy from `.env.example`):
+Create a `.env.local` file in the project root (copy from `.env.example`):
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Edit `.env` and fill in your Firebase credentials:
+Edit `.env.local` and fill in your Firebase credentials:
 
 #### Option A: Using Full Service Account JSON (Recommended for Production)
 
@@ -248,6 +248,16 @@ Create a `firestore.indexes.json` file in your project root and deploy using Fir
 ```bash
 npm install
 ```
+
+### Test Firebase Configuration
+
+Before running the app, verify your Firebase setup:
+
+```bash
+npx tsx lib/test-firebase-simple.ts
+```
+
+This will check if all environment variables are loaded correctly.
 
 ### Run Development Server
 
