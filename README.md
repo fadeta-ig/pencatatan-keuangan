@@ -1,9 +1,10 @@
 # 💰 Pencatatan Keuangan
 
-Aplikasi web modern untuk pencatatan keuangan pribadi atau bisnis kecil. Dibangun dengan Next.js 15, TypeScript, dan Prisma ORM.
+Aplikasi web modern untuk pencatatan keuangan pribadi atau bisnis kecil. Dibangun dengan Next.js 15, TypeScript, dan Firebase.
 
 ## ✨ Fitur Utama
 
+- 🔐 **Authentication** - Login, register, dan session management dengan Firebase Auth
 - 🏦 **Multi Rekening** - Kelola berbagai jenis rekening (Bank, Cash, E-Wallet, dll)
 - 💸 **Transaksi Lengkap** - Catat pemasukan, pengeluaran, dan transfer
 - 📊 **Dashboard Analitik** - Visualisasi keuangan dengan chart dan grafik
@@ -18,14 +19,15 @@ Aplikasi web modern untuk pencatatan keuangan pribadi atau bisnis kecil. Dibangu
 
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Prisma
+- **Database**: Firebase Firestore (NoSQL)
+- **Authentication**: Firebase Auth
+- **Storage**: Firebase Storage
 - **Styling**: Tailwind CSS v4
 - **UI Components**: Radix UI
 - **Forms**: React Hook Form + Zod
 - **Charts**: Recharts
 - **Icons**: Lucide React
-- **State**: Server Actions + React Cache
+- **State**: React Context + Firebase Real-time
 
 ## 📁 Project Structure
 
@@ -34,21 +36,21 @@ pencatatan-keuangan/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Auth routes (login, register)
 │   ├── (dashboard)/       # Dashboard routes
-│   └── api/               # API routes
-├── components/            # React components
-│   ├── ui/               # Base UI components (Button, Card, etc)
+│   └── page.tsx           # Landing page
+├── components/            # React components (coming soon)
+│   ├── ui/               # Base UI components
 │   ├── forms/            # Form components
-│   └── layouts/          # Layout components (Sidebar, Header)
+│   └── layouts/          # Layout components
 ├── lib/                  # Utilities & helpers
-│   ├── actions/         # Server Actions
-│   ├── db/              # Database client
+│   ├── auth/            # Authentication (context, hooks, service)
+│   ├── services/        # Firestore services
 │   ├── utils/           # Utility functions
-│   └── validations/     # Zod schemas
+│   ├── firebase.ts      # Firebase client config
+│   └── firebase-admin.ts # Firebase admin config
 ├── types/               # TypeScript type definitions
+│   └── firestore.ts     # Firestore data models
 ├── hooks/               # Custom React hooks
 ├── constants/           # App constants
-├── prisma/             # Prisma schema & migrations
-│   └── schema.prisma   # Database schema
 └── public/             # Static assets
 ```
 
@@ -57,7 +59,7 @@ pencatatan-keuangan/
 ### Prerequisites
 
 - Node.js 18+
-- PostgreSQL 14+
+- Firebase account (free tier available)
 - npm or yarn
 
 ### Installation
@@ -75,31 +77,38 @@ cd pencatatan-keuangan
 npm install
 ```
 
-3. **Setup environment variables**
+3. **Setup Firebase**
 
-Copy `.env.example` to `.env` and update the values:
+Follow the complete Firebase setup guide in [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+
+Quick steps:
+- Create a Firebase project
+- Enable Firestore and Authentication
+- Get your Firebase config credentials
+
+4. **Setup environment variables**
+
+Copy `.env.example` to `.env.local` and update with your Firebase credentials:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Update `.env` with your database connection:
+Update `.env.local` with your Firebase configuration:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/pencatatan_keuangan?schema=public"
-```
+# Firebase Client Config
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
-4. **Setup database**
-
-```bash
-# Generate Prisma Client
-npx prisma generate
-
-# Run migrations
-npx prisma migrate dev
-
-# (Optional) Seed database
-npx prisma db seed
+# Firebase Admin Config
+FIREBASE_ADMIN_PROJECT_ID=your_project_id
+FIREBASE_ADMIN_CLIENT_EMAIL=your_service_account@your_project.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
 5. **Run development server**
@@ -112,19 +121,34 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 📝 Development Phases
 
-### ✅ Phase 1: Project Setup & Infrastructure
-- Dependencies installation
-- Folder structure
-- Environment configuration
-- Utility functions
+### ✅ Phase 1: Project Setup & Infrastructure (Completed)
+- ✅ Dependencies installation
+- ✅ Folder structure
+- ✅ Environment configuration
+- ✅ Utility functions (format, cn, date)
+- ✅ Custom hooks (use-debounce, use-media-query)
+- ✅ Constants setup
 
-### 🔄 Phase 2: Database Schema & Prisma Setup (In Progress)
-- Schema design
-- Migrations
-- Seed data
+### ✅ Phase 2: Database Schema & Firebase Setup (Completed)
+- ✅ Firebase client configuration
+- ✅ Firebase Admin SDK setup
+- ✅ Firestore data models and types
+- ✅ Firestore helper functions (CRUD operations)
+- ✅ Service layer (user, account, category, transaction, transfer, tag, audit)
+- ✅ Security rules and indexes
+
+### ✅ Phase 3: Authentication System (Completed)
+- ✅ Firebase Authentication integration
+- ✅ Auth context and hooks (useAuth)
+- ✅ Auth service (login, register, logout)
+- ✅ Login page with form validation
+- ✅ Register page with user preferences
+- ✅ Protected route middleware
+- ✅ Session management
+- ✅ Landing page
+- ✅ Dashboard page placeholder
 
 ### 📋 Upcoming Phases
-- Phase 3: Authentication System
 - Phase 4: Core UI Components Library
 - Phase 5: Account Management Module
 - Phase 6: Category Management Module
