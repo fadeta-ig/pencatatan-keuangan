@@ -40,4 +40,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-/app/generated/prisma
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Service Account Keys (NEVER commit these!)
+*-firebase-adminsdk-*.json
+serviceAccountKey.json
+service-account.json

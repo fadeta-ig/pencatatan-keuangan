@@ -2,233 +2,475 @@
 
 ## Overview
 
-This project uses **PostgreSQL** as the database with **Prisma ORM** for type-safe database access.
+This project uses **Firebase Firestore** as the database - a NoSQL cloud database with real-time synchronization capabilities.
 
-## Prerequisites
+> **Note**: This project was migrated from PostgreSQL + Prisma to Firebase Firestore. For detailed setup instructions, see [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
 
-- PostgreSQL 14+ installed and running
-- Database user with create database privileges
+## Why Firebase Firestore?
 
-## Local Development Setup
+- **Serverless** - No database server to maintain
+- **Real-time** - Built-in real-time data synchronization
+- **Scalable** - Automatically scales with your application
+- **Offline support** - Works offline with automatic sync
+- **Global CDN** - Fast access from anywhere
+- **Generous free tier** - Great for development and small apps
 
-### 1. Install PostgreSQL
+## Quick Start
 
-**Ubuntu/Debian:**
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo systemctl start postgresql
-```
+### 1. Prerequisites
 
-**MacOS (with Homebrew):**
-```bash
-brew install postgresql@14
-brew services start postgresql@14
-```
+- Node.js 18+ installed
+- A Google account
+- Firebase project (see [FIREBASE_SETUP.md](./FIREBASE_SETUP.md))
 
-**Windows:**
-Download and install from [PostgreSQL Official Website](https://www.postgresql.org/download/windows/)
-
-### 2. Create Database and User
+### 2. Install Dependencies
 
 ```bash
-# Connect to PostgreSQL
-sudo -u postgres psql
-
-# Create database
-CREATE DATABASE pencatatan_keuangan;
-
-# Create user (optional, you can use existing user)
-CREATE USER your_username WITH PASSWORD 'your_password';
-
-# Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE pencatatan_keuangan TO your_username;
-
-# Exit
-\q
+npm install
 ```
 
 ### 3. Configure Environment Variables
 
-Update `.env` file with your database credentials:
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Fill in your Firebase credentials (get these from Firebase Console):
 
 ```env
-DATABASE_URL="postgresql://your_username:your_password@localhost:5432/pencatatan_keuangan?schema=public"
+# Firebase Client Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456:web:abcdef
+
+# Firebase Admin SDK Configuration
+FIREBASE_ADMIN_PROJECT_ID=your-project-id
+FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project.iam.gserviceaccount.com
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
-Example for local development:
-```env
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/pencatatan_keuangan?schema=public"
-```
-
-### 4. Run Migrations
+### 4. Run Development Server
 
 ```bash
-# Generate Prisma Client
-npm run db:generate
-
-# Run migrations (creates all tables)
-npm run db:migrate
-
-# Seed database with sample data (optional)
-npm run db:seed
+npm run dev
 ```
 
-## Database Schema
+Visit http://localhost:3000
 
-### Models
+## Database Structure
 
-- **User** - User accounts and preferences
-- **Account** - Financial accounts (Bank, Cash, E-Wallet, etc)
-- **Category** - Income/Expense categories
-- **Transaction** - Income and expense records
-- **Transfer** - Money transfers between accounts
-- **Tag** - Flexible transaction labels
-- **TransactionTag** - Many-to-many relationship between transactions and tags
-- **AuditLog** - Audit trail for data changes
+### Collections
 
-### Key Features
+Firestore uses collections (similar to tables) to organize data:
 
-- **Multi-currency support** - Each account can have different currency
-- **Soft deletes** - Categories and accounts use `isActive` flag
-- **Cascade deletes** - Proper cleanup when user is deleted
-- **Indexes** - Optimized for common queries (userId, date, type)
-- **Decimal precision** - Money amounts stored with 2 decimal places
-- **Audit logging** - Track all changes to critical data
+- **users** - User accounts and preferences
+- **accounts** - Financial accounts (Bank, Cash, E-Wallet, etc)
+- **categories** - Income/Expense categories
+- **transactions** - Income and expense records
+- **transfers** - Money transfers between accounts
+- **tags** - Flexible transaction labels
+- **auditLogs** - Audit trail for data changes
 
-## Available Scripts
+### Document Structure
+
+Each collection contains documents (similar to rows). See `types/firestore.ts` for complete TypeScript definitions.
+
+#### Example: User Document
+
+```typescript
+{
+  id: "user123",
+  email: "user@example.com",
+  name: "John Doe",
+  password: "hashed_password",
+  timezone: "Asia/Jakarta",
+  currency: "IDR",
+  locale: "id-ID",
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+```
+
+#### Example: Transaction Document
+
+```typescript
+{
+  id: "txn123",
+  userId: "user123",
+  accountId: "acc456",
+  categoryId: "cat789",
+  type: "EXPENSE",
+  amount: 50000,
+  currency: "IDR",
+  date: Timestamp,
+  notes: "Lunch",
+  tags: ["food", "daily"],
+  createdAt: Timestamp,
+  updatedAt: Timestamp
+}
+```
+
+## Key Features
+
+### 1. Multi-currency Support
+
+Each account can have its own currency. Transfers between different currencies support exchange rates.
+
+```typescript
+{
+  fromAccountId: "usd_account",
+  toAccountId: "idr_account",
+  amount: 100, // USD
+  currency: "USD",
+  exchangeRate: 15500,
+  convertedAmount: 1550000 // IDR
+}
+```
+
+### 2. Soft Deletes
+
+Categories and accounts use `isActive` flag instead of hard deletes:
+
+```typescript
+{
+  isActive: false // Soft deleted
+}
+```
+
+### 3. Real-time Updates
+
+Firestore supports real-time listeners for live data:
+
+```typescript
+import { onSnapshot, collection } from 'firebase/firestore';
+
+onSnapshot(collection(db, 'transactions'), (snapshot) => {
+  // Automatically updates when data changes
+  snapshot.forEach((doc) => {
+    console.log(doc.data());
+  });
+});
+```
+
+### 4. Audit Logging
+
+All critical operations are logged in `auditLogs` collection:
+
+```typescript
+{
+  userId: "user123",
+  action: "UPDATE",
+  entity: "transaction",
+  entityId: "txn123",
+  oldData: {...},
+  newData: {...},
+  ipAddress: "192.168.1.1",
+  timestamp: Timestamp
+}
+```
+
+### 5. Automatic Balance Calculation
+
+Account balances are automatically updated when transactions or transfers are created:
+
+```typescript
+// Creating a transaction
+await createTransaction({
+  accountId: "acc123",
+  type: "EXPENSE",
+  amount: 50000,
+  // ... other fields
+});
+// Account balance is automatically deducted
+```
+
+## Helper Functions
+
+### Firestore Operations
+
+Located in `lib/firestore-helpers.ts`:
+
+```typescript
+// Create document
+await createDocument('transactions', transactionData);
+
+// Get document
+await getDocument('transactions', transactionId);
+
+// Update document
+await updateDocument('transactions', transactionId, { amount: 60000 });
+
+// Delete document
+await deleteDocument('transactions', transactionId);
+
+// Query documents
+await queryDocuments('transactions', {
+  where: [{ field: 'userId', operator: '==', value: userId }],
+  orderBy: [{ field: 'date', direction: 'desc' }],
+  limit: 20
+});
+```
+
+### Service Layer
+
+Domain-specific operations in `lib/services/`:
+
+```typescript
+// User service
+import { createUser, getUserByEmail } from '@/lib/services/user.service';
+
+// Account service
+import { createAccount, getTotalBalance } from '@/lib/services/account.service';
+
+// Transaction service
+import { createTransaction, getUserTransactions } from '@/lib/services/transaction.service';
+
+// And more...
+```
+
+## Security Rules
+
+Firestore uses declarative security rules to protect your data. Rules are defined in Firebase Console.
+
+### Example Rules
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can only access their own data
+    match /transactions/{transactionId} {
+      allow read, write: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
+    }
+
+    // Audit logs are read-only for users
+    match /auditLogs/{logId} {
+      allow read: if request.auth != null &&
+        resource.data.userId == request.auth.uid;
+      allow write: if false; // Only server can write
+    }
+  }
+}
+```
+
+See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for complete security rules.
+
+## Indexes
+
+Firestore automatically creates indexes for simple queries. For complex queries, composite indexes are required.
+
+### Required Composite Indexes
+
+Create these in Firebase Console > Firestore > Indexes:
+
+1. **Transactions by user and date**
+   - Collection: `transactions`
+   - Fields: `userId` (Ascending), `date` (Descending)
+
+2. **Transactions by account**
+   - Collection: `transactions`
+   - Fields: `userId` (Ascending), `accountId` (Ascending), `date` (Descending)
+
+3. **Active accounts**
+   - Collection: `accounts`
+   - Fields: `userId` (Ascending), `isActive` (Ascending)
+
+See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for complete index list.
+
+## Local Development with Emulators (Optional)
+
+Firebase provides local emulators for offline development:
 
 ```bash
-# Generate Prisma Client (run after schema changes)
-npm run db:generate
+# Install Firebase CLI
+npm install -g firebase-tools
 
-# Create a new migration
-npm run db:migrate
+# Login to Firebase
+firebase login
 
-# Push schema to database without creating migration (for prototyping)
-npm run db:push
+# Initialize emulators
+firebase init emulators
 
-# Seed database with sample data
-npm run db:seed
-
-# Open Prisma Studio (database GUI)
-npm run db:studio
-
-# Reset database (⚠️ DELETES ALL DATA)
-npm run db:reset
+# Start emulators
+firebase emulators:start
 ```
 
-## Prisma Studio
+See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for detailed emulator setup.
 
-Prisma Studio is a visual database browser. Launch it with:
-
-```bash
-npm run db:studio
-```
-
-Then open http://localhost:5555 in your browser.
-
-## Production Setup
+## Production Deployment
 
 ### Environment Variables
 
-For production, use connection pooling and set proper SSL:
+Set environment variables in your hosting platform:
 
-```env
-DATABASE_URL="postgresql://user:password@host:5432/database?schema=public&sslmode=require&connection_limit=10"
-```
+- **Vercel**: Project Settings > Environment Variables
+- **Netlify**: Site Settings > Environment Variables
+- **Firebase Hosting**: Use `.env.production` or Cloud Functions config
 
-### Migrations
+### Security Checklist
 
-```bash
-# In production, only run migrate deploy (not migrate dev)
-npx prisma migrate deploy
-```
+- ✅ Firestore security rules published
+- ✅ Composite indexes created
+- ✅ Environment variables configured
+- ✅ Service account key secured (never in Git)
+- ✅ CORS configured if needed
+- ✅ Rate limiting implemented
+- ✅ Billing alerts set up
 
-### Recommended Settings
+## Backup and Export
 
-- Enable connection pooling (PgBouncer or Prisma Data Proxy)
-- Set up automated backups
-- Monitor query performance
-- Use read replicas for heavy read workloads
+### Export Data
 
-## Backup and Restore
-
-### Backup
+Firebase provides built-in export functionality:
 
 ```bash
-# Backup entire database
-pg_dump -U your_username -d pencatatan_keuangan -F c -f backup.dump
-
-# Backup as SQL
-pg_dump -U your_username -d pencatatan_keuangan > backup.sql
+# Install gcloud CLI
+# Export Firestore data
+gcloud firestore export gs://your-bucket/backups/$(date +%Y%m%d)
 ```
 
-### Restore
+### Import Data
 
 ```bash
-# Restore from dump
-pg_restore -U your_username -d pencatatan_keuangan backup.dump
-
-# Restore from SQL
-psql -U your_username -d pencatatan_keuangan < backup.sql
+gcloud firestore import gs://your-bucket/backups/20240101
 ```
+
+### Scheduled Backups
+
+Set up automated backups using Cloud Scheduler in Google Cloud Console.
+
+## Performance Optimization
+
+### 1. Use Pagination
+
+```typescript
+const transactions = await queryDocuments('transactions', {
+  where: [{ field: 'userId', operator: '==', value: userId }],
+  limit: 20,
+  startAfter: lastDoc // For next page
+});
+```
+
+### 2. Cache Frequently Accessed Data
+
+```typescript
+// Use React Query or SWR for caching
+const { data } = useQuery('accounts', () => getUserAccounts(userId));
+```
+
+### 3. Limit Document Size
+
+- Keep documents under 1MB
+- Use subcollections for large datasets
+- Store large files in Cloud Storage, not Firestore
+
+### 4. Batch Operations
+
+```typescript
+import { writeBatch } from 'firebase/firestore';
+
+const batch = writeBatch(db);
+batch.set(docRef1, data1);
+batch.update(docRef2, data2);
+await batch.commit(); // Atomic operation
+```
+
+### 5. Use Firebase Admin SDK for Server Operations
+
+```typescript
+// In API routes, use Admin SDK for better performance
+import { adminDb } from '@/lib/firebase-admin';
+
+export async function POST(req: Request) {
+  const snapshot = await adminDb
+    .collection('transactions')
+    .where('userId', '==', userId)
+    .get();
+
+  return Response.json(snapshot.docs.map(d => d.data()));
+}
+```
+
+## Cost Optimization
+
+### Free Tier Limits
+
+- **Reads**: 50,000 per day
+- **Writes**: 20,000 per day
+- **Deletes**: 20,000 per day
+- **Storage**: 1 GB
+
+### Tips to Stay in Free Tier
+
+1. Use local state management (reduce reads)
+2. Implement client-side caching
+3. Use pagination (don't fetch all data)
+4. Clean up old data periodically
+5. Use Firebase emulators for development
 
 ## Troubleshooting
 
-### Connection refused
+### "Missing or insufficient permissions"
 
-```bash
-# Check if PostgreSQL is running
-sudo systemctl status postgresql
+**Solution**: Check Firestore security rules and ensure user is authenticated.
 
-# Start PostgreSQL
-sudo systemctl start postgresql
-```
+### "The query requires an index"
 
-### Authentication failed
+**Solution**: Click the link in the error - it will auto-create the index in Firebase Console.
 
-- Check username and password in `.env`
-- Verify user has proper permissions
-- Check `pg_hba.conf` for authentication method
+### "Firebase: Error (auth/invalid-api-key)"
 
-### Migration errors
+**Solution**: Verify `NEXT_PUBLIC_FIREBASE_API_KEY` in `.env` is correct.
 
-```bash
-# Reset database and start fresh (⚠️ DELETES ALL DATA)
-npm run db:reset
-```
+### Slow queries
 
-### Prisma Client not found
+**Solution**:
+1. Create appropriate indexes
+2. Limit query results
+3. Use pagination
+4. Cache results client-side
 
-```bash
-# Regenerate Prisma Client
-npm run db:generate
-```
+### High costs
 
-## Database Design Principles
+**Solution**:
+1. Check Firebase Console > Usage
+2. Review inefficient queries
+3. Implement caching
+4. Use Firebase emulators for development
 
-1. **Normalization** - Data is normalized to 3NF
-2. **Referential Integrity** - Foreign keys with appropriate cascade rules
-3. **Performance** - Strategic indexes on frequently queried columns
-4. **Security** - Password hashing, input validation, prepared statements
-5. **Audit Trail** - Complete audit log for compliance
-6. **Scalability** - Designed to handle millions of transactions
+## Migration from PostgreSQL
 
-## Performance Tips
+This project was migrated from PostgreSQL + Prisma. Key differences:
 
-- Use composite indexes for common query patterns
-- Implement pagination for large datasets
-- Cache frequently accessed data (balances, summaries)
-- Use database-level aggregations instead of application-level
-- Monitor slow queries with `EXPLAIN ANALYZE`
+| PostgreSQL/Prisma | Firebase Firestore |
+|-------------------|-------------------|
+| Relational database | NoSQL document database |
+| SQL queries | JavaScript SDK |
+| Migrations | No migrations needed |
+| Foreign keys | Manual relationship management |
+| Joins | Denormalization or multiple queries |
+| ACID transactions | Limited transactions (500 writes max) |
 
-## Security Considerations
+## Additional Resources
 
-- Never commit `.env` file to version control
-- Use strong database passwords
-- Restrict database user permissions
-- Enable SSL in production
-- Regular security updates
-- Implement rate limiting for API endpoints
-- Sanitize all user inputs
+- [Firebase Firestore Documentation](https://firebase.google.com/docs/firestore)
+- [Firestore Best Practices](https://firebase.google.com/docs/firestore/best-practices)
+- [Security Rules Guide](https://firebase.google.com/docs/rules)
+- [Full Setup Guide](./FIREBASE_SETUP.md)
+
+## Support
+
+For detailed setup instructions, see [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
+
+For Firebase-specific issues, visit [Firebase Support](https://firebase.google.com/support)
+
+---
+
+**Happy coding! 🚀**
