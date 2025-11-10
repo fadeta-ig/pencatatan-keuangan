@@ -1,4 +1,4 @@
-/**
+/*
  * Custom React Hooks
  * Re-export all hooks for easy imports
  */
