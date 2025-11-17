@@ -12,6 +12,11 @@ async function testFirebaseConnection() {
   console.log('🔥 Testing Firebase Configuration...\n');
 
   try {
+    // Check if Firebase is initialized
+    if (!db || !auth) {
+      throw new Error('Firebase is not initialized. Please check your Firebase configuration.');
+    }
+
     // Test 1: Check Firebase initialization
     console.log('✓ Firebase app initialized successfully');
     console.log(`  Project ID: ${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}`);
