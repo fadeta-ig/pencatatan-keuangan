@@ -21,7 +21,9 @@ service cloud.firestore {
     // Users collection
     match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if isAuthenticated() && request.auth.uid == userId;
+      // Allow user creation if authenticated and email matches
+      allow create: if isAuthenticated() &&
+        request.resource.data.email == request.auth.token.email;
       allow update, delete: if isOwner(userId);
     }
 
