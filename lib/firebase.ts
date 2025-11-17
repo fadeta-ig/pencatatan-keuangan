@@ -86,22 +86,34 @@ export const firebaseConfigError = missingFields.length > 0 || invalidFields.len
   : { hasError: false };
 
 if (firebaseConfigError.hasError) {
-  console.error('🔥 Firebase Configuration Error:');
-  console.error(firebaseConfigError.message);
-  console.error(firebaseConfigError.helpText);
+  if (typeof window !== 'undefined') {
+    console.error('🔥 Firebase Configuration Error:');
+    console.error(firebaseConfigError.message);
+    console.error(firebaseConfigError.helpText);
+  }
 }
 
-// Initialize Firebase only if it hasn't been initialized yet
-let app: FirebaseApp;
-if (!getApps().length) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApps()[0];
+// Initialize Firebase only if we have valid configuration
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
+let storage: FirebaseStorage | undefined;
+
+if (!firebaseConfigError.hasError) {
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApps()[0];
+  }
+
+  // Initialize Firebase services
+  auth = getAuth(app);
+  db = getFirestore(app);
+  storage = getStorage(app);
 }
 
-// Initialize Firebase services
-export const auth: Auth = getAuth(app);
-export const db: Firestore = getFirestore(app);
-export const storage: FirebaseStorage = getStorage(app);
-
-export default app;
+// Export with type assertions for backwards compatibility
+// In production with valid config, these will be defined
+// During build without config, they'll be undefined but won't break the build
+export { auth, db, storage };
+export default app as FirebaseApp;

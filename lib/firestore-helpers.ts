@@ -26,6 +26,16 @@ import {
 import { db } from './firebase';
 import { COLLECTIONS } from '@/types/firestore';
 
+/**
+ * Helper to ensure Firestore is initialized
+ */
+function ensureDb() {
+  if (!db) {
+    throw new Error('Firestore is not initialized. Please check your Firebase configuration.');
+  }
+  return db;
+}
+
 // Generic function to create a document
 export async function createDocument<T extends DocumentData>(
   collectionName: string,
@@ -38,7 +48,7 @@ export async function createDocument<T extends DocumentData>(
     updatedAt: timestamp,
   };
 
-  const docRef = await addDoc(collection(db, collectionName), docData);
+  const docRef = await addDoc(collection(ensureDb(), collectionName), docData);
   return docRef.id;
 }
 
@@ -47,7 +57,7 @@ export async function getDocument<T extends DocumentData>(
   collectionName: string,
   docId: string
 ): Promise<(T & { id: string }) | null> {
-  const docRef = doc(db, collectionName, docId);
+  const docRef = doc(ensureDb(), collectionName, docId);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
@@ -62,7 +72,7 @@ export async function updateDocument<T extends Partial<DocumentData>>(
   docId: string,
   data: T
 ): Promise<void> {
-  const docRef = doc(db, collectionName, docId);
+  const docRef = doc(ensureDb(), collectionName, docId);
   await updateDoc(docRef, {
     ...data,
     updatedAt: Timestamp.now(),
@@ -74,7 +84,7 @@ export async function deleteDocument(
   collectionName: string,
   docId: string
 ): Promise<void> {
-  const docRef = doc(db, collectionName, docId);
+  const docRef = doc(ensureDb(), collectionName, docId);
   await deleteDoc(docRef);
 }
 
@@ -123,7 +133,7 @@ export async function queryDocuments<T extends DocumentData>(
     constraints.push(startAfter(options.startAfter));
   }
 
-  const q = query(collection(db, collectionName), ...constraints);
+  const q = query(collection(ensureDb(), collectionName), ...constraints);
   const querySnapshot = await getDocs(q);
 
   return querySnapshot.docs.map((doc) => ({
@@ -136,7 +146,7 @@ export async function queryDocuments<T extends DocumentData>(
 export async function getAllDocuments<T extends DocumentData>(
   collectionName: string
 ): Promise<Array<T & { id: string }>> {
-  const querySnapshot = await getDocs(collection(db, collectionName));
+  const querySnapshot = await getDocs(collection(ensureDb(), collectionName));
   return querySnapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
@@ -148,7 +158,7 @@ export async function documentExists(
   collectionName: string,
   docId: string
 ): Promise<boolean> {
-  const docRef = doc(db, collectionName, docId);
+  const docRef = doc(ensureDb(), collectionName, docId);
   const docSnap = await getDoc(docRef);
   return docSnap.exists();
 }
@@ -163,12 +173,12 @@ export interface BatchOperation {
 
 // Get collection reference
 export function getCollectionRef(collectionName: string): CollectionReference {
-  return collection(db, collectionName);
+  return collection(ensureDb(), collectionName);
 }
 
 // Get document reference
 export function getDocRef(collectionName: string, docId: string): DocumentReference {
-  return doc(db, collectionName, docId);
+  return doc(ensureDb(), collectionName, docId);
 }
 
 // Timestamp helpers
@@ -192,7 +202,7 @@ export function timestampToISO(timestamp: Timestamp): string {
 export async function queryUserDocuments<T extends DocumentData>(
   collectionName: string,
   userId: string,
-  additionalOptions: Omit<QueryOptions, 'where'> = {}
+  additionalOptions: QueryOptions = {}
 ): Promise<Array<T & { id: string }>> {
   return queryDocuments<T>(collectionName, {
     ...additionalOptions,

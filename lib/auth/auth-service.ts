@@ -30,6 +30,16 @@ export interface LoginData {
 }
 
 /**
+ * Helper to ensure Firebase auth is initialized
+ */
+function ensureAuth() {
+  if (!auth) {
+    throw new Error('Firebase authentication is not initialized. Please check your Firebase configuration.');
+  }
+  return auth;
+}
+
+/**
  * Register a new user
  */
 export async function register(data: RegisterData): Promise<UserCredential> {
@@ -42,7 +52,7 @@ export async function register(data: RegisterData): Promise<UserCredential> {
   }
 
   // Create user in Firebase Auth
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const userCredential = await createUserWithEmailAndPassword(ensureAuth(), email, password);
 
   try {
     // Update display name in Firebase Auth
@@ -75,7 +85,7 @@ export async function login(data: LoginData): Promise<UserCredential> {
   const { email, password } = data;
 
   // Sign in with Firebase Auth
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const userCredential = await signInWithEmailAndPassword(ensureAuth(), email, password);
 
   return userCredential;
 }
@@ -84,14 +94,14 @@ export async function login(data: LoginData): Promise<UserCredential> {
  * Sign out current user
  */
 export async function logout(): Promise<void> {
-  await firebaseSignOut(auth);
+  await firebaseSignOut(ensureAuth());
 }
 
 /**
  * Send password reset email
  */
 export async function sendPasswordReset(email: string): Promise<void> {
-  await sendPasswordResetEmail(auth, email);
+  await sendPasswordResetEmail(ensureAuth(), email);
 }
 
 /**
@@ -105,12 +115,12 @@ export async function changePassword(user: User, newPassword: string): Promise<v
  * Get current user
  */
 export function getCurrentUser(): User | null {
-  return auth.currentUser;
+  return auth?.currentUser || null;
 }
 
 /**
  * Check if user is authenticated
  */
 export function isAuthenticated(): boolean {
-  return auth.currentUser !== null;
+  return auth?.currentUser !== null && auth?.currentUser !== undefined;
 }

@@ -1,127 +1,156 @@
 'use client';
 
 import { useAuth } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { DashboardLayout } from '@/components/layouts/dashboard-layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { formatCurrency } from '@/lib/utils/format';
+import { Wallet, TrendingUp, TrendingDown, ArrowRightLeft, CheckCircle2 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { user, userData, loading, logout } = useAuth();
-  const router = useRouter();
+  const { user, userData } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [user, loading, router]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Memuat...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
+  const stats = [
+    {
+      title: 'Total Saldo',
+      value: 0,
+      icon: Wallet,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+    },
+    {
+      title: 'Pemasukan Bulan Ini',
+      value: 0,
+      icon: TrendingUp,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+    },
+    {
+      title: 'Pengeluaran Bulan Ini',
+      value: 0,
+      icon: TrendingDown,
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900">Pencatatan Keuangan</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700">
-                Halo, {userData?.name || user.email}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Keluar
-              </button>
-            </div>
-          </div>
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Welcome Section */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Selamat Datang, {userData?.name || user?.email?.split('@')[0]}!
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Berikut adalah ringkasan keuangan Anda hari ini.
+          </p>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Dashboard</h2>
-              <p className="text-gray-600 mb-6">
-                Selamat datang di aplikasi Pencatatan Keuangan!
-              </p>
+        {/* Phase 4 Completion Alert */}
+        <Alert variant="success">
+          <CheckCircle2 className="h-4 w-4" />
+          <AlertTitle>Phase 4 Berhasil Diimplementasikan!</AlertTitle>
+          <AlertDescription>
+            Core UI Components Library telah berhasil dibuat. Aplikasi sekarang menggunakan komponen-komponen reusable yang modern dan konsisten.
+            <div className="mt-2 flex gap-2">
+              <Badge variant="success">Button</Badge>
+              <Badge variant="success">Input</Badge>
+              <Badge variant="success">Card</Badge>
+              <Badge variant="success">Dialog</Badge>
+              <Badge variant="success">Form</Badge>
+              <Badge variant="success">Layout</Badge>
+            </div>
+          </AlertDescription>
+        </Alert>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-blue-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-blue-900 mb-2">Total Saldo</h3>
-                  <p className="text-3xl font-bold text-blue-600">Rp 0</p>
-                </div>
+        {/* Stats Grid */}
+        <div className="grid gap-6 md:grid-cols-3">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.title}>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-600">
+                    {stat.title}
+                  </CardTitle>
+                  <div className={`rounded-full p-2 ${stat.bgColor}`}>
+                    <Icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-2xl font-bold ${stat.color}`}>
+                    {formatCurrency(stat.value, userData?.currency || 'IDR')}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
-                <div className="bg-green-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-green-900 mb-2">Pemasukan</h3>
-                  <p className="text-3xl font-bold text-green-600">Rp 0</p>
-                </div>
-
-                <div className="bg-red-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-red-900 mb-2">Pengeluaran</h3>
-                  <p className="text-3xl font-bold text-red-600">Rp 0</p>
-                </div>
+        {/* Account Info Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Informasi Akun</CardTitle>
+            <CardDescription>
+              Detail profil dan preferensi Anda
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <p className="text-sm font-medium text-gray-500">Nama Lengkap</p>
+                <p className="mt-1 text-sm text-gray-900">{userData?.name || '-'}</p>
               </div>
-
-              <div className="mt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Informasi Akun</h3>
-                <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Nama</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{userData?.name || '-'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Email</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{user.email}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Mata Uang</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{userData?.currency || 'IDR'}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-sm font-medium text-gray-500">Zona Waktu</dt>
-                    <dd className="mt-1 text-sm text-gray-900">{userData?.timezone || 'Asia/Jakarta'}</dd>
-                  </div>
-                </dl>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Email</p>
+                <p className="mt-1 text-sm text-gray-900">{user?.email}</p>
               </div>
-
-              <div className="mt-8 p-4 bg-yellow-50 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  <strong>Status:</strong> Phase 3 (Authentication System) telah berhasil diimplementasikan!
-                  <br />
-                  <span className="text-xs">
-                    Fitur selanjutnya seperti manajemen akun, transaksi, dan dashboard akan segera ditambahkan.
-                  </span>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Mata Uang Default</p>
+                <p className="mt-1 text-sm text-gray-900">
+                  <Badge variant="outline">{userData?.currency || 'IDR'}</Badge>
                 </p>
               </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">Zona Waktu</p>
+                <p className="mt-1 text-sm text-gray-900">{userData?.timezone || 'Asia/Jakarta'}</p>
+              </div>
             </div>
-          </div>
-        </div>
-      </main>
-    </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Aksi Cepat</CardTitle>
+            <CardDescription>
+              Mulai kelola keuangan Anda sekarang
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="flex flex-col items-center rounded-lg border border-gray-200 p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer">
+                <Wallet className="h-8 w-8 text-blue-600 mb-2" />
+                <h3 className="font-medium text-gray-900">Tambah Rekening</h3>
+                <p className="text-xs text-gray-500 mt-1">Kelola rekening bank Anda</p>
+              </div>
+              <div className="flex flex-col items-center rounded-lg border border-gray-200 p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer">
+                <ArrowRightLeft className="h-8 w-8 text-green-600 mb-2" />
+                <h3 className="font-medium text-gray-900">Catat Transaksi</h3>
+                <p className="text-xs text-gray-500 mt-1">Tambah pemasukan/pengeluaran</p>
+              </div>
+              <div className="flex flex-col items-center rounded-lg border border-gray-200 p-4 text-center hover:bg-gray-50 transition-colors cursor-pointer">
+                <TrendingUp className="h-8 w-8 text-purple-600 mb-2" />
+                <h3 className="font-medium text-gray-900">Lihat Laporan</h3>
+                <p className="text-xs text-gray-500 mt-1">Analisis keuangan Anda</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 }
