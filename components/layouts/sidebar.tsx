@@ -80,7 +80,7 @@ export function Sidebar({ className, onClose, isCollapsed = false }: SidebarProp
   return (
     <aside
       className={cn(
-        'flex h-full flex-col border-r border-gray-200 bg-white shadow-xl lg:shadow-none transition-all duration-300',
+        'flex h-screen flex-col border-r border-gray-200 bg-white shadow-xl lg:shadow-none transition-all duration-300',
         isCollapsed ? 'w-20' : 'w-64',
         className
       )}
