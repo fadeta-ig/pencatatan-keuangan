@@ -132,33 +132,24 @@ export async function updateTransaction(
     throw new Error('Transaction not found');
   }
 
-  // Revert old balance change
+  // Determine new values (use old values if not provided)
+  const newAmount = data.amount !== undefined ? data.amount : oldTransaction.amount;
+  const newType = data.type !== undefined ? data.type : oldTransaction.type;
+  const newAccountId = data.accountId !== undefined ? data.accountId : oldTransaction.accountId;
+
+  // Revert old balance change from old account
   await updateAccountBalanceAfterTransaction(
     oldTransaction.accountId,
     -oldTransaction.amount,
     oldTransaction.type
   );
 
-  // Apply new balance change
-  if (data.amount !== undefined && data.type !== undefined) {
-    await updateAccountBalanceAfterTransaction(
-      data.accountId || oldTransaction.accountId,
-      data.amount,
-      data.type
-    );
-  } else if (data.amount !== undefined) {
-    await updateAccountBalanceAfterTransaction(
-      oldTransaction.accountId,
-      data.amount,
-      oldTransaction.type
-    );
-  } else if (data.type !== undefined) {
-    await updateAccountBalanceAfterTransaction(
-      oldTransaction.accountId,
-      oldTransaction.amount,
-      data.type
-    );
-  }
+  // Apply new balance change to new account (could be same or different)
+  await updateAccountBalanceAfterTransaction(
+    newAccountId,
+    newAmount,
+    newType
+  );
 
   return updateDocument(COLLECTIONS.TRANSACTIONS, transactionId, data);
 }
