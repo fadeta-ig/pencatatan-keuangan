@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
-import { getUserTransactions, deleteTransaction } from '@/lib/services/transaction.service';
+import { useTransactions, useLookupHelpers } from '@/hooks';
 import { getUserAccounts } from '@/lib/services/account.service';
 import { getUserCategories } from '@/lib/services/category.service';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
@@ -13,11 +13,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/utils/format';
 import {
-  FirestoreTransaction,
   FirestoreAccount,
   FirestoreCategory,
   TransactionType,
-  CategoryType
 } from '@/types/firestore';
 import {
   ArrowUpCircle,
@@ -68,27 +66,24 @@ function formatDate(date: Date): string {
 
 export default function TransactionsPage() {
   const { user, userData } = useAuth();
-  const [transactions, setTransactions] = useState<Array<FirestoreTransaction & { id: string }>>([]);
-  const [accounts, setAccounts] = useState<Array<FirestoreAccount & { id: string }>>([]);
-  const [categories, setCategories] = useState<Array<FirestoreCategory & { id: string }>>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Filters
+  // Filters state
   const [filterType, setFilterType] = useState<TransactionType | 'ALL'>('ALL');
   const [filterAccountId, setFilterAccountId] = useState<string>('ALL');
   const [filterCategoryId, setFilterCategoryId] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Separate state for accounts and categories for filters
+  const [accounts, setAccounts] = useState<Array<FirestoreAccount & { id: string }>>([]);
+  const [categories, setCategories] = useState<Array<FirestoreCategory & { id: string }>>([]);
+  const [loadingMeta, setLoadingMeta] = useState(true);
+
+  // Fetch accounts and categories for filters
   useEffect(() => {
-    async function loadData() {
+    async function loadMetadata() {
       if (!user?.uid) return;
 
       try {
-        setLoading(true);
-        setError(null);
-
-        // Load accounts and categories first
         const [accountsData, categoriesData] = await Promise.all([
           getUserAccounts(user.uid, true),
           getUserCategories(user.uid, true),
@@ -96,89 +91,50 @@ export default function TransactionsPage() {
 
         setAccounts(accountsData);
         setCategories(categoriesData);
-
-        // Load transactions
-        const transactionsData = await getUserTransactions(user.uid);
-        setTransactions(transactionsData);
       } catch (err) {
-        console.error('Error loading data:', err);
-        setError('Gagal memuat data transaksi. Silakan coba lagi.');
+        console.error('Error loading metadata:', err);
       } finally {
-        setLoading(false);
+        setLoadingMeta(false);
       }
     }
 
-    loadData();
+    loadMetadata();
   }, [user?.uid]);
 
-  // Filter transactions
-  const filteredTransactions = transactions.filter((transaction) => {
-    // Filter by type
-    if (filterType !== 'ALL' && transaction.type !== filterType) {
-      return false;
-    }
-
-    // Filter by account
-    if (filterAccountId !== 'ALL' && transaction.accountId !== filterAccountId) {
-      return false;
-    }
-
-    // Filter by category
-    if (filterCategoryId !== 'ALL' && transaction.categoryId !== filterCategoryId) {
-      return false;
-    }
-
-    // Filter by search query (notes)
-    if (searchQuery && !transaction.notes?.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-
-    return true;
+  // Use transactions hook with filters
+  const {
+    filteredTransactions,
+    loading: loadingTransactions,
+    error,
+    removeTransaction,
+    totalIncome,
+    totalExpense,
+    netBalance,
+  } = useTransactions({
+    userId: user?.uid,
+    filterType,
+    filterAccountId: filterAccountId !== 'ALL' ? filterAccountId : undefined,
+    filterCategoryId: filterCategoryId !== 'ALL' ? filterCategoryId : undefined,
+    searchQuery,
   });
 
-  // Calculate summaries
-  const totalIncome = filteredTransactions
-    .filter((t) => t.type === TransactionType.INCOME)
-    .reduce((sum, t) => sum + t.amount, 0);
+  // Use lookup helpers for efficient name/color lookups
+  const { getAccountName, getCategoryName, getCategoryColor } = useLookupHelpers({
+    accounts,
+    categories,
+  });
 
-  const totalExpense = filteredTransactions
-    .filter((t) => t.type === TransactionType.EXPENSE)
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const netBalance = totalIncome - totalExpense;
-
-  // Handle delete
-  const handleDelete = async (transactionId: string) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
-      return;
-    }
-
+  // Handle delete with error handling
+  const handleDelete = useCallback(async (transactionId: string) => {
     try {
-      await deleteTransaction(transactionId);
-      setTransactions(transactions.filter((t) => t.id !== transactionId));
+      await removeTransaction(transactionId);
     } catch (err) {
       console.error('Error deleting transaction:', err);
       alert('Gagal menghapus transaksi. Silakan coba lagi.');
     }
-  };
+  }, [removeTransaction]);
 
-  // Get account name by ID
-  const getAccountName = (accountId: string) => {
-    const account = accounts.find((a) => a.id === accountId);
-    return account?.name || 'Unknown';
-  };
-
-  // Get category name by ID
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find((c) => c.id === categoryId);
-    return category?.name || 'Unknown';
-  };
-
-  // Get category color by ID
-  const getCategoryColor = (categoryId: string) => {
-    const category = categories.find((c) => c.id === categoryId);
-    return category?.color || '#94a3b8';
-  };
+  const loading = loadingTransactions || loadingMeta;
 
   return (
     <DashboardLayout>

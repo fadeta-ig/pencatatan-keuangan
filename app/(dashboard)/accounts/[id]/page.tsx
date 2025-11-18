@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { getAccountById, deleteAccount } from '@/lib/services/account.service';
+import { useSingleAccount } from '@/hooks';
+import { deleteAccount } from '@/lib/services/account.service';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils/format';
-import { AccountType, FirestoreAccount } from '@/types/firestore';
+import { AccountType } from '@/types/firestore';
 import {
   Landmark,
   Banknote,
@@ -38,6 +38,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { useState } from 'react';
 
 // Icon mapping for account types
 const accountTypeIcons: Record<AccountType, React.ComponentType<{ className?: string }>> = {
@@ -75,43 +76,13 @@ export default function AccountDetailPage() {
   const accountId = params?.id as string;
   const { user } = useAuth();
 
-  const [account, setAccount] = useState<(FirestoreAccount & { id: string }) | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { account, loading, error, balanceChange, balanceChangePercentage, isPositive } = useSingleAccount({
+    accountId,
+    userId: user?.uid,
+  });
+
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  // Load account data
-  useEffect(() => {
-    async function loadAccount() {
-      if (!accountId) return;
-
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getAccountById(accountId);
-
-        if (!data) {
-          setError('Rekening tidak ditemukan');
-          return;
-        }
-
-        if (data.userId !== user?.uid) {
-          setError('Anda tidak memiliki akses ke rekening ini');
-          return;
-        }
-
-        setAccount(data);
-      } catch (err) {
-        console.error('Error loading account:', err);
-        setError('Gagal memuat data rekening. Silakan coba lagi.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadAccount();
-  }, [accountId, user?.uid]);
 
   const handleDelete = async () => {
     if (!accountId) return;
@@ -122,7 +93,6 @@ export default function AccountDetailPage() {
       router.push('/accounts');
     } catch (err) {
       console.error('Error deleting account:', err);
-      setError('Gagal menghapus rekening. Silakan coba lagi.');
       setDeleting(false);
       setShowDeleteDialog(false);
     }
@@ -173,11 +143,6 @@ export default function AccountDetailPage() {
   const Icon = accountTypeIcons[account.type];
   const gradient = accountTypeColors[account.type];
   const typeLabel = accountTypeLabels[account.type];
-  const balanceChange = account.currentBalance - account.initialBalance;
-  const balanceChangePercentage = account.initialBalance !== 0
-    ? ((balanceChange / account.initialBalance) * 100).toFixed(2)
-    : '0';
-  const isPositive = balanceChange >= 0;
 
   return (
     <DashboardLayout>
@@ -365,13 +330,13 @@ export default function AccountDetailPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button asChild className="w-full justify-start" variant="outline">
-                  <Link href={`/transactions?account=${account.id}&type=income`}>
+                  <Link href={`/transactions/new?account=${account.id}&type=income`}>
                     <TrendingUpIcon className="h-4 w-4 mr-2" />
                     Tambah Pemasukan
                   </Link>
                 </Button>
                 <Button asChild className="w-full justify-start" variant="outline">
-                  <Link href={`/transactions?account=${account.id}&type=expense`}>
+                  <Link href={`/transactions/new?account=${account.id}&type=expense`}>
                     <TrendingDown className="h-4 w-4 mr-2" />
                     Tambah Pengeluaran
                   </Link>
@@ -405,7 +370,7 @@ export default function AccountDetailPage() {
                 Mulai catat transaksi untuk rekening ini
               </p>
               <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-                <Link href={`/transactions?account=${account.id}`}>
+                <Link href={`/transactions/new?account=${account.id}`}>
                   Tambah Transaksi
                 </Link>
               </Button>

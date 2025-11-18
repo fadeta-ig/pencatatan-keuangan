@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth';
-import { getUserAccounts } from '@/lib/services/account.service';
+import { useAccounts } from '@/hooks';
+import { deleteAccount } from '@/lib/services/account.service';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useMemo, useState, useCallback } from 'react';
 
 // Icon mapping for account types
 const accountTypeIcons: Record<AccountType, React.ComponentType<{ className?: string }>> = {
@@ -68,41 +69,32 @@ const accountTypeLabels: Record<AccountType, string> = {
 
 export default function AccountsPage() {
   const { user, userData } = useAuth();
-  const [accounts, setAccounts] = useState<Array<FirestoreAccount & { id: string }>>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { accounts, loading, error, totalBalance, balanceByCurrency, removeAccount } = useAccounts({
+    userId: user?.uid,
+    activeOnly: true,
+  });
 
-  useEffect(() => {
-    async function loadAccounts() {
-      if (!user?.uid) return;
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getUserAccounts(user.uid, true);
-        setAccounts(data);
-      } catch (err) {
-        console.error('Error loading accounts:', err);
-        setError('Gagal memuat data rekening. Silakan coba lagi.');
-      } finally {
-        setLoading(false);
-      }
+  // Memoized currency entries for display
+  const currencyEntries = useMemo(() => {
+    return Object.entries(balanceByCurrency).slice(0, 2);
+  }, [balanceByCurrency]);
+
+  // Handle delete with error handling
+  const handleDelete = useCallback(async (accountId: string, accountName: string) => {
+    if (!confirm(`Apakah Anda yakin ingin menghapus rekening "${accountName}"?`)) {
+      return;
     }
 
-    loadAccounts();
-  }, [user?.uid]);
-
-  // Calculate total balance
-  const totalBalance = accounts.reduce((sum, account) => sum + account.currentBalance, 0);
-
-  // Group accounts by currency
-  const balanceByCurrency = accounts.reduce((acc, account) => {
-    if (!acc[account.currency]) {
-      acc[account.currency] = 0;
+    try {
+      setDeleteError(null);
+      await removeAccount(accountId);
+    } catch (err) {
+      console.error('Error deleting account:', err);
+      setDeleteError('Gagal menghapus rekening. Silakan coba lagi.');
     }
-    acc[account.currency] += account.currentBalance;
-    return acc;
-  }, {} as Record<string, number>);
+  }, [removeAccount]);
 
   return (
     <DashboardLayout>
@@ -124,10 +116,10 @@ export default function AccountsPage() {
         </div>
 
         {/* Error Alert */}
-        {error && (
+        {(error || deleteError) && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{error || deleteError}</AlertDescription>
           </Alert>
         )}
 
@@ -154,7 +146,7 @@ export default function AccountsPage() {
             </CardContent>
           </Card>
 
-          {Object.entries(balanceByCurrency).slice(0, 2).map(([currency, balance]) => (
+          {currencyEntries.map(([currency, balance]) => (
             <Card key={currency} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
@@ -289,7 +281,10 @@ export default function AccountsPage() {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
+                          <DropdownMenuItem
+                            className="text-red-600 cursor-pointer"
+                            onClick={() => handleDelete(account.id, account.name)}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Hapus
                           </DropdownMenuItem>
