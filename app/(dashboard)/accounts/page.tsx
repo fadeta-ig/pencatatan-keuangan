@@ -127,7 +127,7 @@ export default function AccountsPage() {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-white/80 mb-1">
                     Total Saldo (Semua Mata Uang)
@@ -139,7 +139,7 @@ export default function AccountsPage() {
                     {accounts.length} rekening aktif
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm">
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex-shrink-0">
                   <Wallet className="h-7 w-7 text-white" />
                 </div>
               </div>
@@ -149,7 +149,7 @@ export default function AccountsPage() {
           {currencyEntries.map(([currency, balance]) => (
             <Card key={currency} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow">
               <CardContent className="p-6">
-                <div className="flex items-start justify-between">
+                <div className="flex items-center justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-600 mb-1">
                       Saldo {currency}
