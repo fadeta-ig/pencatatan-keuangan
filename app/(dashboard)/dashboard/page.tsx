@@ -56,12 +56,12 @@ export default function DashboardPage() {
           <AlertDescription>
             Core UI Components Library telah berhasil dibuat. Aplikasi sekarang menggunakan komponen-komponen reusable yang modern dan konsisten.
             <div className="mt-2 flex gap-2">
-              <Badge variant="success">Button</Badge>
-              <Badge variant="success">Input</Badge>
-              <Badge variant="success">Card</Badge>
-              <Badge variant="success">Dialog</Badge>
-              <Badge variant="success">Form</Badge>
-              <Badge variant="success">Layout</Badge>
+              <Badge className="border border-green-200 bg-green-50 text-green-700">Button</Badge>
+              <Badge className="border border-green-200 bg-green-50 text-green-700">Input</Badge>
+              <Badge className="border border-green-200 bg-green-50 text-green-700">Card</Badge>
+              <Badge className="border border-green-200 bg-green-50 text-green-700">Dialog</Badge>
+              <Badge className="border border-green-200 bg-green-50 text-green-700">Form</Badge>
+              <Badge className="border border-green-200 bg-green-50 text-green-700">Layout</Badge>
             </div>
           </AlertDescription>
         </Alert>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
               <div>
                 <p className="text-sm font-medium text-gray-500">Mata Uang Default</p>
                 <p className="mt-1 text-sm text-gray-900">
-                  <Badge variant="outline">{userData?.currency || 'IDR'}</Badge>
+                  <Badge className="border border-gray-200 bg-transparent">{userData?.currency || 'IDR'}</Badge>
                 </p>
               </div>
               <div>
