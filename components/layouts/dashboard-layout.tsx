@@ -94,9 +94,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           onDesktopSidebarToggle={() => setDesktopSidebarCollapsed(!desktopSidebarCollapsed)}
           desktopSidebarCollapsed={desktopSidebarCollapsed}
         />
-        <main className="flex-1 overflow-y-auto py-6 transition-all duration-200">
+        <main className="flex-1 overflow-y-auto py-8 transition-all duration-200">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
+            <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
               {children}
             </div>
           </div>
