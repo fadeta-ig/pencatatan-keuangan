@@ -68,17 +68,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform transition-all duration-300 ease-in-out',
+          'fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out',
           // Mobile behavior
           'lg:relative lg:z-0',
           // Mobile show/hide
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop show/hide
-          'lg:translate-x-0',
-          desktopSidebarCollapsed && 'lg:!-translate-x-full lg:!w-0'
+          // Desktop always visible
+          'lg:translate-x-0'
         )}
       >
-        <Sidebar onClose={() => setSidebarOpen(false)} />
+        <Sidebar
+          onClose={() => setSidebarOpen(false)}
+          isCollapsed={desktopSidebarCollapsed}
+        />
       </div>
 
       {/* Main content */}
