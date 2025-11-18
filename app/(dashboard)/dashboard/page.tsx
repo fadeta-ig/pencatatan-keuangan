@@ -1,11 +1,13 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/auth';
+import { getUserAccounts } from '@/lib/services/account.service';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils/format';
 import {
   Wallet,
@@ -25,16 +27,43 @@ import Link from 'next/link';
 
 export default function DashboardPage() {
   const { user, userData } = useAuth();
+  const [totalBalance, setTotalBalance] = useState(0);
+  const [accountCount, setAccountCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  // Load account data
+  useEffect(() => {
+    async function loadAccountData() {
+      if (!user?.uid) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const accounts = await getUserAccounts(user.uid, true);
+        const total = accounts.reduce((sum, account) => sum + account.currentBalance, 0);
+        setTotalBalance(total);
+        setAccountCount(accounts.length);
+      } catch (error) {
+        console.error('Error loading account data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAccountData();
+  }, [user?.uid]);
 
   const stats = [
     {
       title: 'Total Saldo',
-      value: 0,
+      value: totalBalance,
       change: '+0%',
       changeType: 'neutral',
       icon: Wallet,
       gradient: 'from-blue-500 to-cyan-500',
       lightBg: 'bg-blue-50',
+      description: `${accountCount} rekening aktif`,
     },
     {
       title: 'Pemasukan Bulan Ini',
@@ -44,6 +73,7 @@ export default function DashboardPage() {
       icon: TrendingUp,
       gradient: 'from-green-500 to-emerald-500',
       lightBg: 'bg-green-50',
+      description: 'Dari transaksi',
     },
     {
       title: 'Pengeluaran Bulan Ini',
@@ -53,6 +83,7 @@ export default function DashboardPage() {
       icon: TrendingDown,
       gradient: 'from-red-500 to-rose-500',
       lightBg: 'bg-red-50',
+      description: 'Dari transaksi',
     },
   ];
 
@@ -148,43 +179,55 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid gap-6 md:grid-cols-3">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <Card
-                key={stat.title}
-                className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:-translate-y-1"
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-600 mb-1">
-                        {stat.title}
-                      </p>
-                      <p className="text-3xl font-bold text-gray-900 mb-2">
-                        {formatCurrency(stat.value, userData?.currency || 'IDR')}
-                      </p>
-                      <div className="flex items-center gap-1 text-sm">
-                        <span className={`font-medium ${
-                          stat.changeType === 'positive'
-                            ? 'text-green-600'
-                            : stat.changeType === 'negative'
-                            ? 'text-red-600'
-                            : 'text-gray-600'
-                        }`}>
-                          {stat.change}
-                        </span>
-                        <span className="text-gray-500">dari bulan lalu</span>
+          {loading ? (
+            <>
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="border-0 bg-white/80 backdrop-blur-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-3">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-8 w-40" />
+                        <Skeleton className="h-4 w-28" />
+                      </div>
+                      <Skeleton className="w-14 h-14 rounded-2xl" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </>
+          ) : (
+            stats.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <Card
+                  key={stat.title}
+                  className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:-translate-y-1"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-600 mb-1">
+                          {stat.title}
+                        </p>
+                        <p className="text-3xl font-bold text-gray-900 mb-2">
+                          {formatCurrency(stat.value, userData?.currency || 'IDR')}
+                        </p>
+                        <div className="flex items-center gap-1 text-sm">
+                          <span className="text-gray-500">
+                            {stat.description}
+                          </span>
+                        </div>
+                      </div>
+                      <div className={`flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                        <Icon className="h-7 w-7 text-white" />
                       </div>
                     </div>
-                    <div className={`flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="h-7 w-7 text-white" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -206,7 +249,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {quickActions.map((action, index) => {
+              {quickActions.map((action) => {
                 const Icon = action.icon;
                 return (
                   <Link key={action.title} href={action.href}>
