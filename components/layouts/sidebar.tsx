@@ -113,11 +113,11 @@ export function Sidebar({ className, onClose, isCollapsed = false }: SidebarProp
                 onClick={handleLinkClick}
                 title={isCollapsed ? item.name : undefined}
                 className={cn(
-                  'group flex items-center rounded-lg text-sm font-medium transition-all duration-200',
-                  isCollapsed ? 'justify-center px-3 py-2.5' : 'gap-3 px-3 py-2.5',
+                  'group flex items-center rounded-xl text-sm font-semibold transition-all duration-200',
+                  isCollapsed ? 'justify-center px-3 py-3' : 'gap-3 px-4 py-3',
                   isActive
-                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-md border border-blue-100'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm'
                 )}
               >
                 <item.icon
@@ -155,11 +155,11 @@ export function Sidebar({ className, onClose, isCollapsed = false }: SidebarProp
                   onClick={handleLinkClick}
                   title={isCollapsed ? item.name : undefined}
                   className={cn(
-                    'group flex items-center rounded-lg text-sm font-medium transition-all duration-200',
-                    isCollapsed ? 'justify-center px-3 py-2.5' : 'gap-3 px-3 py-2.5',
+                    'group flex items-center rounded-xl text-sm font-semibold transition-all duration-200',
+                    isCollapsed ? 'justify-center px-3 py-3' : 'gap-3 px-4 py-3',
                     isActive
-                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-md border border-blue-100'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow-sm'
                   )}
                 >
                   <item.icon
