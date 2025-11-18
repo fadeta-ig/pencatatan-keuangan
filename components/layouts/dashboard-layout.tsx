@@ -55,7 +55,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -65,15 +65,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Fixed at all times */}
       <div
         className={cn(
           'fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out',
-          // Mobile behavior
-          'lg:relative lg:z-0',
           // Mobile show/hide
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          // Desktop always visible
+          // Desktop always visible and fixed
           'lg:translate-x-0'
         )}
       >
@@ -83,14 +81,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main content - With left margin to account for fixed sidebar */}
+      <div
+        className={cn(
+          'flex flex-col min-h-screen transition-all duration-300',
+          // Add left margin on desktop to account for sidebar width
+          desktopSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+        )}
+      >
         <Header
           onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           onDesktopSidebarToggle={() => setDesktopSidebarCollapsed(!desktopSidebarCollapsed)}
           desktopSidebarCollapsed={desktopSidebarCollapsed}
         />
-        <main className="flex-1 py-6 transition-all duration-200">
+        <main className="flex-1 overflow-y-auto py-6 transition-all duration-200">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
               {children}
