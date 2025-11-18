@@ -1,0 +1,308 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/lib/auth';
+import { getUserAccounts } from '@/lib/services/account.service';
+import { DashboardLayout } from '@/components/layouts/dashboard-layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { formatCurrency } from '@/lib/utils/format';
+import { FirestoreAccount, AccountType } from '@/types/firestore';
+import {
+  Wallet,
+  Plus,
+  CreditCard,
+  Landmark,
+  Banknote,
+  Smartphone,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  Trash2,
+  AlertCircle,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+} from 'lucide-react';
+import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+
+// Icon mapping for account types
+const accountTypeIcons: Record<AccountType, React.ComponentType<{ className?: string }>> = {
+  [AccountType.BANK]: Landmark,
+  [AccountType.CASH]: Banknote,
+  [AccountType.E_WALLET]: Smartphone,
+  [AccountType.INVESTMENT]: TrendingUp,
+  [AccountType.CREDIT_CARD]: CreditCard,
+  [AccountType.OTHER]: Wallet,
+};
+
+// Color mapping for account types
+const accountTypeColors: Record<AccountType, string> = {
+  [AccountType.BANK]: 'from-blue-500 to-cyan-500',
+  [AccountType.CASH]: 'from-green-500 to-emerald-500',
+  [AccountType.E_WALLET]: 'from-purple-500 to-pink-500',
+  [AccountType.INVESTMENT]: 'from-orange-500 to-amber-500',
+  [AccountType.CREDIT_CARD]: 'from-red-500 to-rose-500',
+  [AccountType.OTHER]: 'from-gray-500 to-slate-500',
+};
+
+// Label mapping for account types
+const accountTypeLabels: Record<AccountType, string> = {
+  [AccountType.BANK]: 'Bank',
+  [AccountType.CASH]: 'Tunai',
+  [AccountType.E_WALLET]: 'E-Wallet',
+  [AccountType.INVESTMENT]: 'Investasi',
+  [AccountType.CREDIT_CARD]: 'Kartu Kredit',
+  [AccountType.OTHER]: 'Lainnya',
+};
+
+export default function AccountsPage() {
+  const { user, userData } = useAuth();
+  const [accounts, setAccounts] = useState<Array<FirestoreAccount & { id: string }>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadAccounts() {
+      if (!user?.uid) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getUserAccounts(user.uid, true);
+        setAccounts(data);
+      } catch (err) {
+        console.error('Error loading accounts:', err);
+        setError('Gagal memuat data rekening. Silakan coba lagi.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAccounts();
+  }, [user?.uid]);
+
+  // Calculate total balance
+  const totalBalance = accounts.reduce((sum, account) => sum + account.currentBalance, 0);
+
+  // Group accounts by currency
+  const balanceByCurrency = accounts.reduce((acc, account) => {
+    if (!acc[account.currency]) {
+      acc[account.currency] = 0;
+    }
+    acc[account.currency] += account.currentBalance;
+    return acc;
+  }, {} as Record<string, number>);
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Rekening</h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Kelola semua rekening dan akun keuangan Anda
+            </p>
+          </div>
+          <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+            <Link href="/accounts/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Tambah Rekening
+            </Link>
+          </Button>
+        </div>
+
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {/* Summary Cards */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+            <CardContent className="p-6">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-white/80 mb-1">
+                    Total Saldo (Semua Mata Uang)
+                  </p>
+                  <p className="text-3xl font-bold mb-2">
+                    {formatCurrency(totalBalance, userData?.currency || 'IDR')}
+                  </p>
+                  <p className="text-xs text-white/70">
+                    {accounts.length} rekening aktif
+                  </p>
+                </div>
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm">
+                  <Wallet className="h-7 w-7 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {Object.entries(balanceByCurrency).slice(0, 2).map(([currency, balance]) => (
+            <Card key={currency} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 mb-1">
+                      Saldo {currency}
+                    </p>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">
+                      {formatCurrency(balance, currency)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {accounts.filter(a => a.currency === currency).length} rekening
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Accounts List */}
+        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle>Daftar Rekening</CardTitle>
+            <CardDescription>
+              Semua rekening keuangan Anda dalam satu tempat
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
+                    <Skeleton className="h-12 w-12 rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-6 w-32" />
+                  </div>
+                ))}
+              </div>
+            ) : accounts.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
+                  <Wallet className="h-8 w-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Belum Ada Rekening
+                </h3>
+                <p className="text-sm text-gray-600 mb-4 max-w-sm">
+                  Tambahkan rekening pertama Anda untuk mulai mencatat transaksi keuangan
+                </p>
+                <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                  <Link href="/accounts/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Tambah Rekening
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {accounts.map((account) => {
+                  const Icon = accountTypeIcons[account.type];
+                  const gradient = accountTypeColors[account.type];
+                  const typeLabel = accountTypeLabels[account.type];
+                  const balanceChange = account.currentBalance - account.initialBalance;
+                  const isPositive = balanceChange >= 0;
+
+                  return (
+                    <div
+                      key={account.id}
+                      className="group flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                    >
+                      {/* Icon */}
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} shadow-lg group-hover:scale-110 transition-transform duration-200`}>
+                        <Icon className="h-6 w-6 text-white" />
+                      </div>
+
+                      {/* Account Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            {account.name}
+                          </h3>
+                          <Badge variant="outline" className="text-xs">
+                            {typeLabel}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <span className="truncate">
+                            {account.description || 'Tidak ada deskripsi'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Balance */}
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-gray-900">
+                          {formatCurrency(account.currentBalance, account.currency)}
+                        </p>
+                        <div className="flex items-center gap-1 justify-end text-xs">
+                          {isPositive ? (
+                            <ArrowUpRight className="h-3 w-3 text-green-600" />
+                          ) : (
+                            <ArrowDownRight className="h-3 w-3 text-red-600" />
+                          )}
+                          <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+                            {formatCurrency(Math.abs(balanceChange), account.currency)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/accounts/${account.id}`} className="cursor-pointer">
+                              <Eye className="h-4 w-4 mr-2" />
+                              Lihat Detail
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/accounts/${account.id}/edit`} className="cursor-pointer">
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600">
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Hapus
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
+  );
+}
