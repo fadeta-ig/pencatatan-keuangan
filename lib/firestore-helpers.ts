@@ -62,7 +62,7 @@ export async function createDocument<T extends DocumentData>(
     updatedAt: timestamp,
   });
 
-  const docRef = await addDoc(collection(ensureDb(), collectionName), docData);
+  const docRef = await addDoc(collection(ensureDb(), collectionName) as any, docData as any);
   return docRef.id;
 }
 
@@ -91,7 +91,7 @@ export async function updateDocument<T extends Partial<DocumentData>>(
     ...data,
     updatedAt: Timestamp.now(),
   });
-  await updateDoc(docRef, updateData);
+  await updateDoc(docRef as any, updateData as any);
 }
 
 // Generic function to delete a document
