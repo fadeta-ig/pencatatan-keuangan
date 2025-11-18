@@ -63,19 +63,39 @@ const secondaryNavigation = [
 
 export interface SidebarProps {
   className?: string;
+  onClose?: () => void;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ className, onClose }: SidebarProps) {
   const pathname = usePathname();
+
+  const handleLinkClick = () => {
+    // Close sidebar on mobile when a link is clicked
+    if (onClose) {
+      onClose();
+    }
+  };
 
   return (
     <aside
       className={cn(
-        'flex w-64 flex-col border-r border-gray-200 bg-white',
+        'flex h-full w-64 flex-col border-r border-gray-200 bg-white shadow-xl lg:shadow-none',
         className
       )}
     >
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      {/* Sidebar Header */}
+      <div className="flex h-16 items-center gap-3 border-b border-gray-200 px-4">
+        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg">
+          <Wallet className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1">
+          <h2 className="text-sm font-bold text-gray-900">Pencatatan Keuangan</h2>
+          <p className="text-xs text-gray-500">Dashboard</p>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
         <div className="space-y-1">
           {navigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -83,20 +103,24 @@ export function Sidebar({ className }: SidebarProps) {
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={handleLinkClick}
                 className={cn(
-                  'group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-blue-50 text-blue-600'
+                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm'
                     : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                 )}
               >
                 <item.icon
                   className={cn(
-                    'h-5 w-5 shrink-0',
+                    'h-5 w-5 shrink-0 transition-colors',
                     isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
                   )}
                 />
-                {item.name}
+                <span>{item.name}</span>
+                {isActive && (
+                  <div className="ml-auto h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+                )}
               </Link>
             );
           })}
@@ -113,26 +137,45 @@ export function Sidebar({ className }: SidebarProps) {
                 <Link
                   key={item.name}
                   href={item.href}
+                  onClick={handleLinkClick}
                   className={cn(
-                    'group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                    'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200',
                     isActive
-                      ? 'bg-blue-50 text-blue-600'
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                   )}
                 >
                   <item.icon
                     className={cn(
-                      'h-5 w-5 shrink-0',
+                      'h-5 w-5 shrink-0 transition-colors',
                       isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
                     )}
                   />
-                  {item.name}
+                  <span>{item.name}</span>
+                  {isActive && (
+                    <div className="ml-auto h-2 w-2 rounded-full bg-blue-600 animate-pulse" />
+                  )}
                 </Link>
               );
             })}
           </div>
         </div>
       </nav>
+
+      {/* Sidebar Footer */}
+      <div className="border-t border-gray-200 p-4">
+        <div className="rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+          <p className="text-xs font-medium text-gray-900 mb-1">Butuh bantuan?</p>
+          <p className="text-xs text-gray-600 mb-2">Lihat dokumentasi lengkap</p>
+          <Link
+            href="/docs"
+            onClick={handleLinkClick}
+            className="text-xs font-medium text-blue-600 hover:text-blue-700 underline"
+          >
+            Buka Dokumentasi →
+          </Link>
+        </div>
+      </div>
     </aside>
   );
 }

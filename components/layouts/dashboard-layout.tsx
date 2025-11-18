@@ -23,12 +23,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   }, [user, loading, router]);
 
+  // Close sidebar when window is resized to desktop
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <div className="text-center">
-          <Spinner size="lg" />
-          <p className="mt-4 text-gray-600">Memuat...</p>
+          <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg animate-pulse">
+            <Spinner size="lg" className="text-white" />
+          </div>
+          <p className="text-lg font-medium text-gray-700">Memuat dashboard...</p>
+          <p className="mt-2 text-sm text-gray-500">Harap tunggu sebentar</p>
         </div>
       </div>
     );
@@ -39,31 +54,34 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden animate-in fade-in duration-200"
           onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0',
+          'fixed inset-y-0 left-0 z-50 w-64 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <Sidebar />
+        <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
       {/* Main content */}
       <div className="lg:pl-64">
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="py-6">
+        <main className="min-h-[calc(100vh-4rem)] py-6 transition-all duration-200">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            {children}
+            <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
+              {children}
+            </div>
           </div>
         </main>
       </div>
