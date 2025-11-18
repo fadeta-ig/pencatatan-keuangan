@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -7,7 +8,7 @@ import { useAuth } from '@/lib/auth';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, error, clearError } = useAuth();
+  const { register, error, clearError, user, loading } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,6 +20,13 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
+
+  // Redirect to dashboard if already logged in
+  React.useEffect(() => {
+    if (!loading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

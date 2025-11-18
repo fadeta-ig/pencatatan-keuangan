@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -8,12 +9,20 @@ import { useAuth } from '@/lib/auth';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, error, clearError } = useAuth();
+  const { login, error, clearError, user, loading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect to dashboard if already logged in
+  React.useEffect(() => {
+    if (!loading && user) {
+      const redirectTo = searchParams.get('from') || '/dashboard';
+      router.push(redirectTo);
+    }
+  }, [user, loading, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
