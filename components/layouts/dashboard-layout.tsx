@@ -16,6 +16,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [desktopSidebarCollapsed, setDesktopSidebarCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     if (!loading && !user) {
@@ -54,7 +55,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -67,17 +68,27 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 left-0 z-50 w-64 transform transition-all duration-300 ease-in-out',
+          // Mobile behavior
+          'lg:relative lg:z-0',
+          // Mobile show/hide
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          // Desktop show/hide
+          'lg:translate-x-0',
+          desktopSidebarCollapsed && 'lg:!-translate-x-full lg:!w-0'
         )}
       >
         <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
-        <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="min-h-[calc(100vh-4rem)] py-6 transition-all duration-200">
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          onDesktopSidebarToggle={() => setDesktopSidebarCollapsed(!desktopSidebarCollapsed)}
+          desktopSidebarCollapsed={desktopSidebarCollapsed}
+        />
+        <main className="flex-1 py-6 transition-all duration-200">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
               {children}

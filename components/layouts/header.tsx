@@ -14,13 +14,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { LogOut, Menu, User, Settings, Wallet, Bell, X } from 'lucide-react';
+import { LogOut, Menu, User, Settings, Wallet, Bell, X, PanelLeftClose, PanelLeft } from 'lucide-react';
 
 export interface HeaderProps {
   onMenuClick?: () => void;
+  onDesktopSidebarToggle?: () => void;
+  desktopSidebarCollapsed?: boolean;
 }
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header({ onMenuClick, onDesktopSidebarToggle, desktopSidebarCollapsed }: HeaderProps) {
   const { user, userData, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -74,6 +76,21 @@ export function Header({ onMenuClick }: HeaderProps) {
           aria-label="Toggle menu"
         >
           <Menu className="h-5 w-5" />
+        </Button>
+
+        {/* Desktop Sidebar Toggle Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden lg:flex hover:bg-gray-100 transition-colors"
+          onClick={onDesktopSidebarToggle}
+          aria-label="Toggle sidebar"
+        >
+          {desktopSidebarCollapsed ? (
+            <PanelLeft className="h-5 w-5" />
+          ) : (
+            <PanelLeftClose className="h-5 w-5" />
+          )}
         </Button>
 
         {/* Logo & Title - Desktop */}
