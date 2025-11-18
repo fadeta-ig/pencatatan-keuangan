@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login, error, clearError } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
@@ -21,7 +22,10 @@ export default function LoginPage() {
       setIsLoading(true);
       clearError();
       await login(formData);
-      router.push('/dashboard');
+
+      // Redirect to the 'from' parameter if it exists, otherwise go to dashboard
+      const redirectTo = searchParams.get('from') || '/dashboard';
+      router.push(redirectTo);
     } catch (err) {
       // Error is handled by auth context
       console.error('Login error:', err);
@@ -128,5 +132,17 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-gray-600">Memuat...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
