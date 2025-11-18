@@ -36,17 +36,31 @@ function ensureDb() {
   return db;
 }
 
+/**
+ * Helper to remove undefined values from an object
+ * Firestore doesn't accept undefined values, so we need to filter them out
+ */
+function removeUndefinedFields<T extends DocumentData>(data: T): Partial<T> {
+  const result: any = {};
+  for (const key in data) {
+    if (data[key] !== undefined) {
+      result[key] = data[key];
+    }
+  }
+  return result as Partial<T>;
+}
+
 // Generic function to create a document
 export async function createDocument<T extends DocumentData>(
   collectionName: string,
   data: T
 ): Promise<string> {
   const timestamp = Timestamp.now();
-  const docData = {
+  const docData = removeUndefinedFields({
     ...data,
     createdAt: timestamp,
     updatedAt: timestamp,
-  };
+  });
 
   const docRef = await addDoc(collection(ensureDb(), collectionName), docData);
   return docRef.id;
@@ -73,10 +87,11 @@ export async function updateDocument<T extends Partial<DocumentData>>(
   data: T
 ): Promise<void> {
   const docRef = doc(ensureDb(), collectionName, docId);
-  await updateDoc(docRef, {
+  const updateData = removeUndefinedFields({
     ...data,
     updatedAt: Timestamp.now(),
   });
+  await updateDoc(docRef, updateData);
 }
 
 // Generic function to delete a document
