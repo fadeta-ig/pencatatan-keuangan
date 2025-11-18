@@ -205,7 +205,7 @@ export default function DashboardPage() {
                   className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm hover:-translate-y-1"
                 >
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-600 mb-1">
                           {stat.title}
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                           </span>
                         </div>
                       </div>
-                      <div className={`flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                      <div className={`flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${stat.gradient} shadow-lg group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
                         <Icon className="h-7 w-7 text-white" />
                       </div>
                     </div>
