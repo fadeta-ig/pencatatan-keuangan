@@ -167,7 +167,7 @@ export default function TransactionsPage() {
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="shadow-lg border-0 bg-gradient-to-br from-green-600 to-emerald-600 text-white">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-white/80 mb-1">
                     Total Pemasukan
@@ -179,7 +179,7 @@ export default function TransactionsPage() {
                     {filteredTransactions.filter(t => t.type === TransactionType.INCOME).length} transaksi
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm">
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex-shrink-0">
                   <ArrowUpCircle className="h-7 w-7 text-white" />
                 </div>
               </div>
@@ -188,7 +188,7 @@ export default function TransactionsPage() {
 
           <Card className="shadow-lg border-0 bg-gradient-to-br from-red-600 to-rose-600 text-white">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-white/80 mb-1">
                     Total Pengeluaran
@@ -200,7 +200,7 @@ export default function TransactionsPage() {
                     {filteredTransactions.filter(t => t.type === TransactionType.EXPENSE).length} transaksi
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm">
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex-shrink-0">
                   <ArrowDownCircle className="h-7 w-7 text-white" />
                 </div>
               </div>
@@ -209,7 +209,7 @@ export default function TransactionsPage() {
 
           <Card className={`shadow-lg border-0 ${netBalance >= 0 ? 'bg-gradient-to-br from-blue-600 to-indigo-600' : 'bg-gradient-to-br from-orange-600 to-amber-600'} text-white`}>
             <CardContent className="p-6">
-              <div className="flex items-start justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-white/80 mb-1">
                     Saldo Bersih
@@ -221,7 +221,7 @@ export default function TransactionsPage() {
                     {filteredTransactions.length} total transaksi
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm">
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex-shrink-0">
                   {netBalance >= 0 ? (
                     <TrendingUp className="h-7 w-7 text-white" />
                   ) : (
@@ -372,7 +372,7 @@ export default function TransactionsPage() {
                       className="group flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
                     >
                       {/* Icon */}
-                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${isIncome ? 'bg-gradient-to-br from-green-500 to-emerald-500' : 'bg-gradient-to-br from-red-500 to-rose-500'} shadow-lg group-hover:scale-110 transition-transform duration-200`}>
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${isIncome ? 'bg-gradient-to-br from-green-500 to-emerald-500' : 'bg-gradient-to-br from-red-500 to-rose-500'} shadow-lg group-hover:scale-110 transition-transform duration-200 flex-shrink-0`}>
                         {isIncome ? (
                           <ArrowUpCircle className="h-6 w-6 text-white" />
                         ) : (

@@ -184,13 +184,13 @@ export default function DashboardPage() {
               {[1, 2, 3].map((i) => (
                 <Card key={i} className="border-0 bg-white/80 backdrop-blur-sm">
                   <CardContent className="p-6">
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-center justify-between gap-4">
                       <div className="flex-1 space-y-3">
                         <Skeleton className="h-4 w-32" />
                         <Skeleton className="h-8 w-40" />
                         <Skeleton className="h-4 w-28" />
                       </div>
-                      <Skeleton className="w-14 h-14 rounded-2xl" />
+                      <Skeleton className="w-14 h-14 rounded-2xl flex-shrink-0" />
                     </div>
                   </CardContent>
                 </Card>
@@ -253,8 +253,8 @@ export default function DashboardPage() {
                 const Icon = action.icon;
                 return (
                   <Link key={action.title} href={action.href}>
-                    <div className="group flex items-start gap-4 rounded-xl border border-gray-200 p-4 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer">
-                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${action.iconBg} group-hover:scale-110 transition-transform duration-200`}>
+                    <div className="group flex items-center gap-4 rounded-xl border border-gray-200 p-4 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 cursor-pointer">
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl ${action.iconBg} group-hover:scale-110 transition-transform duration-200 flex-shrink-0`}>
                         <Icon className={`h-6 w-6 ${action.iconColor}`} />
                       </div>
                       <div className="flex-1">

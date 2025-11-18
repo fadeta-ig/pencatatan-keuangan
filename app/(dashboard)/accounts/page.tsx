@@ -222,7 +222,7 @@ export default function AccountsPage() {
                       className="group flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
                     >
                       {/* Icon */}
-                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} shadow-lg group-hover:scale-110 transition-transform duration-200`}>
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} shadow-lg group-hover:scale-110 transition-transform duration-200 flex-shrink-0`}>
                         <Icon className="h-6 w-6 text-white" />
                       </div>
 
