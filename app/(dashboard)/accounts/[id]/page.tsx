@@ -200,9 +200,9 @@ export default function AccountDetailPage() {
           <div className="absolute top-0 right-0 -mt-8 -mr-8 h-48 w-48 rounded-full bg-white/10 blur-3xl"></div>
           <div className="absolute bottom-0 left-0 -mb-8 -ml-8 h-48 w-48 rounded-full bg-white/10 blur-3xl"></div>
           <CardContent className="p-8 relative">
-            <div className="flex items-start justify-between mb-8">
+            <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm">
+                <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex-shrink-0">
                   <Icon className="h-8 w-8 text-white" />
                 </div>
                 <div>
@@ -212,7 +212,7 @@ export default function AccountDetailPage() {
                   </p>
                 </div>
               </div>
-              <Badge className="bg-white/20 hover:bg-white/30 border-white/30 text-white backdrop-blur-sm">
+              <Badge className="bg-white/20 hover:bg-white/30 border-white/30 text-white backdrop-blur-sm flex-shrink-0">
                 {typeLabel}
               </Badge>
             </div>
