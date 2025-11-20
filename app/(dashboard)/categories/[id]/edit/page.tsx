@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { getCategoryById, updateCategory } from '@/lib/services/category.service';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,15 +68,17 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/category/${resolvedParams.id}`);
+        const categoryData = await getCategoryById(resolvedParams.id);
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Gagal mengambil data kategori');
+        if (!categoryData) {
+          throw new Error('Kategori tidak ditemukan');
         }
 
-        const data = await response.json();
-        const categoryData = data.data;
+        // Verify ownership
+        if (categoryData.userId !== user.uid) {
+          throw new Error('Anda tidak memiliki akses ke kategori ini');
+        }
+
         setCategory(categoryData);
 
         // Set form data
@@ -114,25 +117,13 @@ export default function EditCategoryPage({ params }: EditCategoryPageProps) {
       setSaving(true);
       setError(null);
 
-      const response = await fetch(`/api/category/${resolvedParams.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          type: formData.type,
-          color: formData.color,
-          icon: formData.icon,
-          description: formData.description.trim() || undefined,
-        }),
+      await updateCategory(resolvedParams.id, {
+        name: formData.name.trim(),
+        type: formData.type,
+        color: formData.color,
+        icon: formData.icon,
+        description: formData.description.trim() || undefined,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Gagal mengupdate kategori');
-      }
 
       // Redirect ke halaman categories
       router.push('/categories');

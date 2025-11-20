@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { createCategory } from '@/lib/services/category.service';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -65,26 +66,15 @@ export default function NewCategoryPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/category', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name.trim(),
-          type: formData.type,
-          color: formData.color,
-          icon: formData.icon,
-          description: formData.description.trim() || undefined,
-          isActive: true,
-        }),
+      await createCategory({
+        userId: user.uid,
+        name: formData.name.trim(),
+        type: formData.type,
+        color: formData.color,
+        icon: formData.icon,
+        description: formData.description.trim() || undefined,
+        isActive: true,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Gagal membuat kategori');
-      }
 
       // Redirect ke halaman categories
       router.push('/categories');
