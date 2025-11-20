@@ -13,6 +13,7 @@ import {
   Settings,
   FileText,
   TrendingUp,
+  ArrowRightLeft,
 } from 'lucide-react';
 
 const navigation = [
@@ -30,6 +31,11 @@ const navigation = [
     name: 'Transaksi',
     href: '/transactions',
     icon: ArrowUpDown,
+  },
+  {
+    name: 'Transfer',
+    href: '/transfers',
+    icon: ArrowRightLeft,
   },
   {
     name: 'Kategori',
