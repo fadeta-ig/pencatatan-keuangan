@@ -14,9 +14,9 @@ import {
 import { CategoryType } from '@/types/firestore';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 /**
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const categoryId = params.id;
+    const { id: categoryId } = await params;
 
     // Get category
     const category = await getCategoryById(categoryId);
@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const categoryId = params.id;
+    const { id: categoryId } = await params;
 
     // Get existing category
     const existingCategory = await getCategoryById(categoryId);
@@ -194,7 +194,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const categoryId = params.id;
+    const { id: categoryId } = await params;
 
     // Get existing category
     const existingCategory = await getCategoryById(categoryId);

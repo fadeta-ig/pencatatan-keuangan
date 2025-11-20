@@ -9,9 +9,9 @@ import {
 } from '@/lib/services/transaction.service';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 /**
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const transactionId = params.id;
+    const { id: transactionId } = await params;
 
     // Get existing transaction
     const existingTransaction = await getTransactionById(transactionId);

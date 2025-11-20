@@ -9,10 +9,10 @@ import {
 } from '@/lib/services/transaction.service';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
     tagId: string;
-  };
+  }>;
 }
 
 /**
@@ -24,7 +24,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const { id: transactionId, tagId } = params;
+    const { id: transactionId, tagId } = await params;
 
     // Get existing transaction
     const existingTransaction = await getTransactionById(transactionId);
