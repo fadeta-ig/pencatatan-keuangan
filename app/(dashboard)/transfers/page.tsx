@@ -31,7 +31,7 @@ export default function TransfersPage() {
   const { transfers, loading, error, removeTransfer } = useTransfers({
     userId: user?.uid,
   });
-  const { accounts } = useAccounts({
+  const { accounts, loading: accountsLoading } = useAccounts({
     userId: user?.uid,
     activeOnly: false, // Include all accounts to show names
   });
@@ -44,6 +44,15 @@ export default function TransfersPage() {
     accounts.forEach((account) => {
       map.set(account.id, account);
     });
+
+    // Debug: Log account map
+    if (accounts.length > 0) {
+      console.log('Account Map:', {
+        totalAccounts: accounts.length,
+        accountIds: accounts.map(a => ({ id: a.id, name: a.name }))
+      });
+    }
+
     return map;
   }, [accounts]);
 
@@ -151,7 +160,7 @@ export default function TransfersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {loading || accountsLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
@@ -189,6 +198,17 @@ export default function TransfersPage() {
                   const toAccount = accountMap.get(transfer.toAccountId);
                   const isMultiCurrency = transfer.exchangeRate && transfer.convertedAmount;
 
+                  // Debug: Log transfer lookup
+                  if (!fromAccount || !toAccount) {
+                    console.log('Account lookup failed:', {
+                      transferId: transfer.id,
+                      fromAccountId: transfer.fromAccountId,
+                      toAccountId: transfer.toAccountId,
+                      fromAccountFound: !!fromAccount,
+                      toAccountFound: !!toAccount
+                    });
+                  }
+
                   return (
                     <div
                       key={transfer.id}
@@ -203,11 +223,11 @@ export default function TransfersPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="font-semibold text-gray-900">
-                            {fromAccount?.name || 'Unknown'}
+                            {fromAccount?.name || `Account ${transfer.fromAccountId.substring(0, 8)}`}
                           </span>
                           <ArrowRight className="h-4 w-4 text-gray-400" />
                           <span className="font-semibold text-gray-900">
-                            {toAccount?.name || 'Unknown'}
+                            {toAccount?.name || `Account ${transfer.toAccountId.substring(0, 8)}`}
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600">
