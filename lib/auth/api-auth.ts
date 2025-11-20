@@ -18,6 +18,11 @@ export async function verifyAuth(
   request: NextRequest
 ): Promise<AuthenticatedUser> {
   try {
+    // Check if Firebase Admin is initialized
+    if (!adminAuth) {
+      throw new Error('Firebase Admin is not initialized. Please check your environment variables.');
+    }
+
     // Get the authorization header
     const authHeader = request.headers.get('authorization');
 

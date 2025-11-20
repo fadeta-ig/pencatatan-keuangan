@@ -14,9 +14,9 @@ import { TransactionType } from '@/types/firestore';
 import { toTimestamp } from '@/lib/firestore-helpers';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 /**
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const transactionId = params.id;
+    const { id: transactionId } = await params;
 
     // Get transaction
     const transaction = await getTransactionById(transactionId);
@@ -69,7 +69,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const transactionId = params.id;
+    const { id: transactionId } = await params;
 
     // Get existing transaction
     const existingTransaction = await getTransactionById(transactionId);
@@ -189,7 +189,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Verify authentication
     const user = await verifyAuth(request);
 
-    const transactionId = params.id;
+    const { id: transactionId } = await params;
 
     // Get existing transaction
     const existingTransaction = await getTransactionById(transactionId);
