@@ -14,6 +14,7 @@ import {
   FileText,
   TrendingUp,
   ArrowRightLeft,
+  User,
 } from 'lucide-react';
 
 const navigation = [
@@ -55,6 +56,11 @@ const navigation = [
 ];
 
 const secondaryNavigation = [
+  {
+    name: 'Profil',
+    href: '/profile',
+    icon: User,
+  },
   {
     name: 'Pengaturan',
     href: '/settings',

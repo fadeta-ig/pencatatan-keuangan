@@ -98,7 +98,7 @@ export default function AccountsPage() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -107,7 +107,7 @@ export default function AccountsPage() {
               Kelola semua rekening dan akun keuangan Anda
             </p>
           </div>
-          <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+          <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
             <Link href="/accounts/new">
               <Plus className="h-4 w-4 mr-2" />
               Tambah Rekening
@@ -123,63 +123,106 @@ export default function AccountsPage() {
           </Alert>
         )}
 
-        {/* Summary Cards */}
+        {/* Summary Cards - Glassmorphism */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
-            <CardContent className="p-6">
+          {/* Total Balance Card */}
+          <div className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]">
+            {/* Animated Liquid Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 opacity-90">
+              {/* Liquid orbs */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+            </div>
+
+            {/* Glassmorphism overlay */}
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+
+            {/* Border gradient */}
+            <div className="absolute inset-0 rounded-3xl border border-white/30 shadow-2xl" />
+
+            {/* Content */}
+            <div className="relative p-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-white/80 mb-1">
+                  <p className="text-sm font-medium text-white/80 mb-2">
                     Total Saldo (Semua Mata Uang)
                   </p>
-                  <p className="text-3xl font-bold mb-2">
+                  <p className="text-3xl font-black text-white drop-shadow-lg mb-1">
                     {formatCurrency(totalBalance, userData?.currency || 'IDR')}
                   </p>
                   <p className="text-xs text-white/70">
                     {accounts.length} rekening aktif
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex-shrink-0">
-                  <Wallet className="h-7 w-7 text-white" />
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                  <Wallet className="h-7 w-7 text-white drop-shadow-md" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {currencyEntries.map(([currency, balance]) => (
-            <Card key={currency} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-600 mb-1">
-                      Saldo {currency}
-                    </p>
-                    <p className="text-3xl font-bold text-gray-900 mb-2">
-                      {formatCurrency(balance, currency)}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {accounts.filter(a => a.currency === currency).length} rekening
-                    </p>
+          {/* Currency Balance Cards */}
+          {currencyEntries.map(([currency, balance], index) => {
+            const gradients = [
+              'from-emerald-600 to-teal-600',
+              'from-violet-600 to-purple-600',
+            ];
+            const gradient = gradients[index % gradients.length];
+
+            return (
+              <div key={currency} className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]">
+                {/* Animated Liquid Gradient Background */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-90`}>
+                  {/* Liquid orbs */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl animate-pulse" />
+                  <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+                </div>
+
+                {/* Glassmorphism overlay */}
+                <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+
+                {/* Border gradient */}
+                <div className="absolute inset-0 rounded-3xl border border-white/30 shadow-2xl" />
+
+                {/* Content */}
+                <div className="relative p-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-white/80 mb-2">
+                        Saldo {currency}
+                      </p>
+                      <p className="text-3xl font-black text-white drop-shadow-lg mb-1">
+                        {formatCurrency(balance, currency)}
+                      </p>
+                      <p className="text-xs text-white/70">
+                        {accounts.filter(a => a.currency === currency).length} rekening
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Accounts List */}
-        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Daftar Rekening</CardTitle>
-            <CardDescription>
-              Semua rekening keuangan Anda dalam satu tempat
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        {/* Accounts List - Glassmorphism */}
+        <div className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl">
+          <div className="p-6 border-b border-gray-200/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-gray-900">Daftar Rekening</h3>
+                <p className="text-xs text-gray-600 mt-1">
+                  Semua rekening keuangan Anda dalam satu tempat
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
             {loading ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
+                  <div key={i} className="flex items-center gap-4 p-4 bg-white/60 backdrop-blur-sm border border-white/40 rounded-2xl">
                     <Skeleton className="h-12 w-12 rounded-xl" />
                     <div className="flex-1 space-y-2">
                       <Skeleton className="h-5 w-32" />
@@ -190,17 +233,17 @@ export default function AccountsPage() {
                 ))}
               </div>
             ) : accounts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-4">
-                  <Wallet className="h-8 w-8 text-blue-600" />
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mb-4 shadow-lg">
+                  <Wallet className="h-10 w-10 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
                   Belum Ada Rekening
                 </h3>
-                <p className="text-sm text-gray-600 mb-4 max-w-sm">
+                <p className="text-sm text-gray-600 mb-6 max-w-sm">
                   Tambahkan rekening pertama Anda untuk mulai mencatat transaksi keuangan
                 </p>
-                <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
                   <Link href="/accounts/new">
                     <Plus className="h-4 w-4 mr-2" />
                     Tambah Rekening
@@ -219,84 +262,84 @@ export default function AccountsPage() {
                   return (
                     <div
                       key={account.id}
-                      className="group flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
+                      className="group relative overflow-hidden rounded-2xl bg-white/60 backdrop-blur-sm border border-white/40 hover:bg-white/80 hover:border-white/60 transition-all duration-300 hover:shadow-lg"
                     >
-                      {/* Icon */}
-                      <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} shadow-lg group-hover:scale-110 transition-transform duration-200 flex-shrink-0`}>
-                        <Icon className="h-6 w-6 text-white" />
-                      </div>
-
-                      {/* Account Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-gray-900 truncate">
-                            {account.name}
-                          </h3>
-                          <Badge variant="outline" className="text-xs">
-                            {typeLabel}
-                          </Badge>
+                      <div className="flex items-center gap-4 p-4">
+                        {/* Icon */}
+                        <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0`}>
+                          <Icon className="h-6 w-6 text-white drop-shadow-sm" />
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span className="truncate">
+
+                        {/* Account Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-bold text-gray-900 text-sm truncate">
+                              {account.name}
+                            </h3>
+                            <Badge variant="outline" className="text-[10px] px-2 py-0">
+                              {typeLabel}
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-600 truncate">
                             {account.description || 'Tidak ada deskripsi'}
-                          </span>
+                          </p>
                         </div>
-                      </div>
 
-                      {/* Balance */}
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900">
-                          {formatCurrency(account.currentBalance, account.currency)}
-                        </p>
-                        <div className="flex items-center gap-1 justify-end text-xs">
-                          {isPositive ? (
-                            <ArrowUpRight className="h-3 w-3 text-green-600" />
-                          ) : (
-                            <ArrowDownRight className="h-3 w-3 text-red-600" />
-                          )}
-                          <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
-                            {formatCurrency(Math.abs(balanceChange), account.currency)}
-                          </span>
+                        {/* Balance */}
+                        <div className="text-right mr-2">
+                          <p className="text-lg font-black text-gray-900">
+                            {formatCurrency(account.currentBalance, account.currency)}
+                          </p>
+                          <div className="flex items-center gap-1 justify-end text-xs">
+                            {isPositive ? (
+                              <ArrowUpRight className="h-3 w-3 text-green-600" />
+                            ) : (
+                              <ArrowDownRight className="h-3 w-3 text-red-600" />
+                            )}
+                            <span className={isPositive ? 'text-green-600' : 'text-red-600'}>
+                              {formatCurrency(Math.abs(balanceChange), account.currency)}
+                            </span>
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Actions */}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/accounts/${account.id}`} className="cursor-pointer">
-                              <Eye className="h-4 w-4 mr-2" />
-                              Lihat Detail
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href={`/accounts/${account.id}/edit`} className="cursor-pointer">
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-red-600 cursor-pointer"
-                            onClick={() => handleDelete(account.id, account.name)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Hapus
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                        {/* Actions */}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:bg-white/60">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-white/95 backdrop-blur-md">
+                            <DropdownMenuItem asChild>
+                              <Link href={`/accounts/${account.id}`} className="cursor-pointer">
+                                <Eye className="h-4 w-4 mr-2" />
+                                Lihat Detail
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                              <Link href={`/accounts/${account.id}/edit`} className="cursor-pointer">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-red-600 cursor-pointer"
+                              onClick={() => handleDelete(account.id, account.name)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Hapus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm run dev:*)",
+      "Bash(timeout:*)",
+      "Bash(nul)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Implement Transfer Module and Category Management (Phase 8)\n\n## Transfer Module (Phase 8)\n- Create Transfer API endpoints (POST, GET, DELETE)\n- Implement automatic balance adjustment on transfer\n- Add multi-currency transfer support with exchange rate\n- Create use-transfers custom hook\n- Build transfers list page with summary cards\n- Build new transfer page with validation\n- Add exchange rate calculator for multi-currency\n- Add transfer link to sidebar\n- Create comprehensive API documentation\n\n## Category Management Module\n- Create use-categories custom hook\n- Build categories list page with tabs (All, Income, Expense)\n- Build new category page with icon & color picker\n- Build edit category page\n- Add category link to sidebar (already exists)\n\n## UI/UX Improvements\n- Fix label text color contrast issue (text-gray-900)\n- Ensure all form labels are readable on white background\n- Add preview cards for transfers\n- Implement insufficient balance warnings\n- Add multi-currency indicators\n\n## Features\n✅ Transfer between accounts (same currency)\n✅ Multi-currency transfer with exchange rate\n✅ Automatic balance deduction from source\n✅ Automatic balance addition to destination\n✅ Delete transfer with balance reversion\n✅ Category CRUD with visual customization\n✅ Project analysis documentation\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git commit:*)",
+      "Bash(npm install:*)",
+      "Bash(taskkill:*)",
+      "Bash(del /F /Q \"C:\\Users\\ADMIN\\pencatatan-keuangan\\.next\\dev\\lock\" 2)",
+      "Bash(powershell -Command \"Stop-Process -Id 18424 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; Get-Process -Id 18424 -ErrorAction SilentlyContinue | Select-Object Id\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
