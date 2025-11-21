@@ -19,6 +19,7 @@ export interface AuthContextType {
   register: (data: RegisterData) => Promise<void>;
   logout: () => Promise<void>;
   clearError: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -129,6 +130,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setError(null);
   };
 
+  const refreshUser = async () => {
+    if (user?.email) {
+      try {
+        const firestoreUser = await getUserByEmail(user.email);
+        setUserData(firestoreUser);
+      } catch (err) {
+        console.error('Error refreshing user data:', err);
+      }
+    }
+  };
+
   const value: AuthContextType = {
     user,
     userData,
@@ -138,6 +150,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     register,
     logout,
     clearError,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

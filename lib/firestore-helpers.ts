@@ -7,6 +7,7 @@ import {
   getDoc,
   getDocs,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -50,7 +51,7 @@ function removeUndefinedFields<T extends DocumentData>(data: T): Partial<T> {
   return result as Partial<T>;
 }
 
-// Generic function to create a document
+// Generic function to create a document (auto-generated ID)
 export async function createDocument<T extends DocumentData>(
   collectionName: string,
   data: T
@@ -64,6 +65,24 @@ export async function createDocument<T extends DocumentData>(
 
   const docRef = await addDoc(collection(ensureDb(), collectionName) as any, docData as any);
   return docRef.id;
+}
+
+// Create a document with a specific ID
+export async function createDocumentWithId<T extends DocumentData>(
+  collectionName: string,
+  docId: string,
+  data: T
+): Promise<string> {
+  const timestamp = Timestamp.now();
+  const docData = removeUndefinedFields({
+    ...data,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  });
+
+  const docRef = doc(ensureDb(), collectionName, docId);
+  await setDoc(docRef as any, docData as any);
+  return docId;
 }
 
 // Generic function to get a document by ID

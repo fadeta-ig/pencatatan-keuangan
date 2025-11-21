@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { formatCurrency } from '@/lib/utils/format';
+import { formatCurrency, formatDate as formatDateUtil } from '@/lib/utils/format';
+import { downloadCSV, transactionsToCSV, ExportTransaction } from '@/lib/utils/export';
 import {
   FirestoreAccount,
   FirestoreCategory,
@@ -33,6 +34,7 @@ import {
   Search,
   Wallet,
   Tag,
+  Download,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -153,12 +155,40 @@ export default function TransactionsPage() {
               Kelola semua pemasukan dan pengeluaran Anda
             </p>
           </div>
-          <Button asChild className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg">
-            <Link href="/transactions/new">
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Transaksi
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (filteredTransactions.length === 0) return;
+
+                // Transform transactions for export
+                const exportData: ExportTransaction[] = filteredTransactions.map((txn) => ({
+                  id: txn.id,
+                  date: txn.date.toDate(),
+                  type: txn.type,
+                  category: getCategoryName(txn.categoryId),
+                  account: getAccountName(txn.accountId),
+                  amount: txn.amount,
+                  currency: txn.currency,
+                  notes: txn.notes,
+                }));
+
+                const csvContent = transactionsToCSV(exportData);
+                const filename = `transaksi_${new Date().toISOString().split('T')[0]}.csv`;
+                downloadCSV(csvContent, filename);
+              }}
+              disabled={loading || filteredTransactions.length === 0}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button asChild className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-lg">
+              <Link href="/transactions/new">
+                <Plus className="h-4 w-4 mr-2" />
+                Tambah Transaksi
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Error Alert */}

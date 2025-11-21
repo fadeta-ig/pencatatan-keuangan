@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { getTransactionById, updateTransaction } from '@/lib/services/transaction.service';
 import { getUserAccounts } from '@/lib/services/account.service';
 import { getUserCategories } from '@/lib/services/category.service';
+import { getUserTags } from '@/lib/services/tag.service';
 import { DashboardLayout } from '@/components/layouts/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,8 @@ import {
   CategoryType,
   FirestoreTransaction,
   FirestoreAccount,
-  FirestoreCategory
+  FirestoreCategory,
+  FirestoreTag
 } from '@/types/firestore';
 import {
   ArrowUpCircle,
@@ -28,7 +30,10 @@ import {
   AlertCircle,
   CheckCircle2,
   Loader2,
+  Hash,
+  X,
 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -63,6 +68,7 @@ export default function EditTransactionPage() {
   const [accounts, setAccounts] = useState<Array<FirestoreAccount & { id: string }>>([]);
   const [allCategories, setAllCategories] = useState<Array<FirestoreCategory & { id: string }>>([]);
   const [filteredCategories, setFilteredCategories] = useState<Array<FirestoreCategory & { id: string }>>([]);
+  const [allTags, setAllTags] = useState<Array<FirestoreTag & { id: string }>>([]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -77,6 +83,7 @@ export default function EditTransactionPage() {
     categoryId: '',
     date: new Date(),
     notes: '',
+    tags: [] as string[],
   });
 
   // Load transaction data
@@ -88,11 +95,12 @@ export default function EditTransactionPage() {
         setLoading(true);
         setError(null);
 
-        // Load transaction, accounts, and categories
-        const [transactionData, accountsData, categoriesData] = await Promise.all([
+        // Load transaction, accounts, categories, and tags
+        const [transactionData, accountsData, categoriesData, tagsData] = await Promise.all([
           getTransactionById(transactionId),
           getUserAccounts(user.uid, true),
           getUserCategories(user.uid, true),
+          getUserTags(user.uid),
         ]);
 
         if (!transactionData) {
@@ -108,6 +116,7 @@ export default function EditTransactionPage() {
         setTransaction(transactionData);
         setAccounts(accountsData);
         setAllCategories(categoriesData);
+        setAllTags(tagsData);
 
         // Set form data
         setFormData({
@@ -117,6 +126,7 @@ export default function EditTransactionPage() {
           categoryId: transactionData.categoryId,
           date: toDate(transactionData.date),
           notes: transactionData.notes || '',
+          tags: transactionData.tags || [],
         });
       } catch (err) {
         console.error('Error loading data:', err);
@@ -184,6 +194,7 @@ export default function EditTransactionPage() {
         currency: account.currency,
         date: toTimestamp(formData.date),
         notes: formData.notes.trim() || undefined,
+        tags: formData.tags,
       });
 
       setSuccess(true);
@@ -439,6 +450,80 @@ export default function EditTransactionPage() {
                   disabled={saving || success}
                   rows={3}
                 />
+              </div>
+
+              {/* Tags */}
+              <div className="space-y-2">
+                <Label>Tags (Opsional)</Label>
+                {/* Selected Tags */}
+                {formData.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.tags.map((tagId) => {
+                      const tag = allTags.find(t => t.id === tagId);
+                      if (!tag) return null;
+                      return (
+                        <Badge
+                          key={tagId}
+                          variant="secondary"
+                          className="pl-2 pr-1 py-1 flex items-center gap-1"
+                          style={{
+                            backgroundColor: `${tag.color}20`,
+                            color: tag.color,
+                            borderColor: tag.color,
+                          }}
+                        >
+                          <Hash className="h-3 w-3" />
+                          {tag.name}
+                          <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({
+                              ...prev,
+                              tags: prev.tags.filter(id => id !== tagId)
+                            }))}
+                            className="ml-1 hover:bg-black/10 rounded p-0.5"
+                            disabled={saving || success}
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* Available Tags */}
+                {allTags.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    {allTags
+                      .filter(tag => !formData.tags.includes(tag.id))
+                      .map((tag) => (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          onClick={() => setFormData(prev => ({
+                            ...prev,
+                            tags: [...prev.tags, tag.id]
+                          }))}
+                          disabled={saving || success}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border hover:scale-105 transition-transform disabled:opacity-50"
+                          style={{
+                            backgroundColor: `${tag.color}10`,
+                            color: tag.color,
+                            borderColor: `${tag.color}40`,
+                          }}
+                        >
+                          <Hash className="h-3 w-3" />
+                          {tag.name}
+                        </button>
+                      ))}
+                    {allTags.filter(tag => !formData.tags.includes(tag.id)).length === 0 && (
+                      <span className="text-xs text-gray-500">Semua tag sudah dipilih</span>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500">
+                    Belum ada tag. <Link href="/tags/new" className="text-indigo-600 hover:underline">Buat tag baru</Link>
+                  </p>
+                )}
               </div>
 
               {/* Form Actions */}

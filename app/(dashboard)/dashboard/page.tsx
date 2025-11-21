@@ -126,13 +126,16 @@ export default function DashboardPage() {
   }, [transactions]);
 
   // Calculate percentage changes
-  const incomeChange = previousMonthIncome > 0
-    ? ((monthlyIncome - previousMonthIncome) / previousMonthIncome * 100).toFixed(1)
-    : monthlyIncome > 0 ? '+100' : '0';
+  const incomeChangeNum = previousMonthIncome > 0
+    ? ((monthlyIncome - previousMonthIncome) / previousMonthIncome * 100)
+    : monthlyIncome > 0 ? 100 : 0;
 
-  const expenseChange = previousMonthExpense > 0
-    ? ((monthlyExpense - previousMonthExpense) / previousMonthExpense * 100).toFixed(1)
-    : monthlyExpense > 0 ? '+100' : '0';
+  const expenseChangeNum = previousMonthExpense > 0
+    ? ((monthlyExpense - previousMonthExpense) / previousMonthExpense * 100)
+    : monthlyExpense > 0 ? 100 : 0;
+
+  const incomeChange = incomeChangeNum.toFixed(1);
+  const expenseChange = expenseChangeNum.toFixed(1);
 
   const stats = [
     {
@@ -148,7 +151,7 @@ export default function DashboardPage() {
     {
       title: 'Pemasukan Bulan Ini',
       value: monthlyIncome,
-      change: `${incomeChange > 0 ? '+' : ''}${incomeChange}%`,
+      change: `${incomeChangeNum > 0 ? '+' : ''}${incomeChange}%`,
       changeType: 'positive',
       icon: TrendingUp,
       gradient: 'from-green-500 to-emerald-500',
@@ -158,7 +161,7 @@ export default function DashboardPage() {
     {
       title: 'Pengeluaran Bulan Ini',
       value: monthlyExpense,
-      change: `${expenseChange > 0 ? '+' : ''}${expenseChange}%`,
+      change: `${expenseChangeNum > 0 ? '+' : ''}${expenseChange}%`,
       changeType: 'negative',
       icon: TrendingDown,
       gradient: 'from-red-500 to-rose-500',
@@ -255,6 +258,43 @@ export default function DashboardPage() {
         date: date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }),
         Pemasukan: income,
         Pengeluaran: expense,
+      };
+    });
+  }, [transactions]);
+
+  // Prepare monthly comparison data - Last 6 months
+  const monthlyComparisonData = useMemo(() => {
+    const months = [];
+    const now = new Date();
+
+    for (let i = 5; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({
+        month: date.getMonth(),
+        year: date.getFullYear(),
+        label: date.toLocaleDateString('id-ID', { month: 'short' }),
+      });
+    }
+
+    return months.map(({ month, year, label }) => {
+      const monthTransactions = transactions.filter(txn => {
+        const txnDate = txn.date.toDate();
+        return txnDate.getMonth() === month && txnDate.getFullYear() === year;
+      });
+
+      const income = monthTransactions
+        .filter(t => t.type === CategoryType.INCOME)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      const expense = monthTransactions
+        .filter(t => t.type === CategoryType.EXPENSE)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+      return {
+        bulan: label,
+        Pemasukan: income,
+        Pengeluaran: expense,
+        Net: income - expense,
       };
     });
   }, [transactions]);
@@ -617,8 +657,51 @@ export default function DashboardPage() {
               )}
             </div>
 
+            {/* Monthly Comparison Chart */}
+            <div className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-gray-900">Perbandingan Bulanan</h3>
+                <Badge variant="outline" className="text-xs">6 Bulan</Badge>
+              </div>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={monthlyComparisonData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+                  <XAxis
+                    dataKey="bulan"
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => formatCurrency(value, userData?.currency || 'IDR')}
+                    contentStyle={{
+                      borderRadius: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                      backdropFilter: 'blur(10px)',
+                      fontSize: '12px',
+                      padding: '8px 12px'
+                    }}
+                    cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
+                    iconType="circle"
+                    iconSize={8}
+                  />
+                  <Bar dataKey="Pemasukan" fill="#10B981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="Pengeluaran" fill="#EF4444" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
             {/* Monthly Summary - Minimalist */}
-            <div className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl p-6 lg:col-span-2">
+            <div className="relative overflow-hidden rounded-3xl bg-white/40 backdrop-blur-xl border border-white/20 shadow-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-bold text-gray-900">Ringkasan</h3>
                 <Badge variant="outline" className="text-xs">Bulan Ini</Badge>

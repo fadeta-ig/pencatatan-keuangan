@@ -12,3 +12,4 @@ export * from './use-transactions';
 export * from './use-transaction-form';
 export * from './use-transfers';
 export * from './use-lookup-helpers';
+export * from './use-tags';

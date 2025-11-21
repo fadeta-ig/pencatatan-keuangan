@@ -12,7 +12,7 @@ import {
   UserCredential,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { createUser, getUserByEmail, emailExists } from '@/lib/services/user.service';
+import { createUserWithId, getUserByEmail, emailExists } from '@/lib/services/user.service';
 import { FirestoreUserInput } from '@/types/firestore';
 
 export interface RegisterData {
@@ -58,7 +58,7 @@ export async function register(data: RegisterData): Promise<UserCredential> {
     // Update display name in Firebase Auth
     await updateProfile(userCredential.user, { displayName: name });
 
-    // Create user document in Firestore
+    // Create user document in Firestore with Firebase Auth UID
     const userData: FirestoreUserInput = {
       email,
       name,
@@ -68,7 +68,7 @@ export async function register(data: RegisterData): Promise<UserCredential> {
       locale,
     };
 
-    await createUser(userData);
+    await createUserWithId(userCredential.user.uid, userData);
 
     return userCredential;
   } catch (error) {

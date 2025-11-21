@@ -13,7 +13,9 @@
       "Bash(npm install:*)",
       "Bash(taskkill:*)",
       "Bash(del /F /Q \"C:\\Users\\ADMIN\\pencatatan-keuangan\\.next\\dev\\lock\" 2)",
-      "Bash(powershell -Command \"Stop-Process -Id 18424 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; Get-Process -Id 18424 -ErrorAction SilentlyContinue | Select-Object Id\")"
+      "Bash(powershell -Command \"Stop-Process -Id 18424 -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; Get-Process -Id 18424 -ErrorAction SilentlyContinue | Select-Object Id\")",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)"
     ],
     "deny": [],
     "ask": []

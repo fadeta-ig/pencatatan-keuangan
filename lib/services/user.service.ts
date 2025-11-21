@@ -4,6 +4,7 @@
 import { Timestamp } from 'firebase/firestore';
 import {
   createDocument,
+  createDocumentWithId,
   getDocument,
   updateDocument,
   deleteDocument,
@@ -12,7 +13,7 @@ import {
 import { COLLECTIONS, FirestoreUser, FirestoreUserInput } from '@/types/firestore';
 import * as bcrypt from 'bcryptjs';
 
-// Create a new user
+// Create a new user (auto-generated ID)
 export async function createUser(data: FirestoreUserInput): Promise<string> {
   // Hash password before storing
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -23,6 +24,19 @@ export async function createUser(data: FirestoreUserInput): Promise<string> {
   };
 
   return createDocument<FirestoreUserInput>(COLLECTIONS.USERS, userData);
+}
+
+// Create a new user with specific ID (e.g., Firebase Auth UID)
+export async function createUserWithId(userId: string, data: FirestoreUserInput): Promise<string> {
+  // Hash password before storing
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
+  const userData = {
+    ...data,
+    password: hashedPassword,
+  };
+
+  return createDocumentWithId<FirestoreUserInput>(COLLECTIONS.USERS, userId, userData);
 }
 
 // Get user by ID
