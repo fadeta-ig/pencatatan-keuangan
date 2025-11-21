@@ -80,7 +80,7 @@ export default function CategoriesPage() {
               Kelola kategori pemasukan dan pengeluaran
             </p>
           </div>
-          <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
+          <Button asChild className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
             <Link href="/categories/new">
               <Plus className="h-4 w-4 mr-2" />
               Tambah Kategori
@@ -101,7 +101,7 @@ export default function CategoriesPage() {
           {/* Total Categories Card */}
           <div className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]">
             {/* Animated Liquid Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 opacity-90">
+            <div className="absolute inset-0 bg-linear-to-br from-blue-600 to-indigo-600 opacity-90">
               {/* Liquid orbs */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl animate-pulse" />
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -124,7 +124,7 @@ export default function CategoriesPage() {
                     {stats.total}
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <Folder className="h-7 w-7 text-white drop-shadow-md" />
                 </div>
               </div>
@@ -134,7 +134,7 @@ export default function CategoriesPage() {
           {/* Income Categories Card */}
           <div className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]">
             {/* Animated Liquid Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-emerald-600 opacity-90">
+            <div className="absolute inset-0 bg-linear-to-br from-green-600 to-emerald-600 opacity-90">
               {/* Liquid orbs */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl animate-pulse" />
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -157,7 +157,7 @@ export default function CategoriesPage() {
                     {stats.income}
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <TrendingUp className="h-7 w-7 text-white drop-shadow-md" />
                 </div>
               </div>
@@ -167,7 +167,7 @@ export default function CategoriesPage() {
           {/* Expense Categories Card */}
           <div className="group relative overflow-hidden rounded-3xl transition-all duration-500 hover:scale-[1.02]">
             {/* Animated Liquid Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-red-600 to-rose-600 opacity-90">
+            <div className="absolute inset-0 bg-linear-to-br from-red-600 to-rose-600 opacity-90">
               {/* Liquid orbs */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl animate-pulse" />
               <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -190,7 +190,7 @@ export default function CategoriesPage() {
                     {stats.expense}
                   </p>
                 </div>
-                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 shrink-0 group-hover:scale-110 transition-transform duration-300">
                   <TrendingDown className="h-7 w-7 text-white drop-shadow-md" />
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default function CategoriesPage() {
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {[1, 2, 3, 4, 5, 6].map((i) => (
                       <div key={i} className="flex items-start gap-3 p-4 bg-white/60 backdrop-blur-sm border border-white/40 rounded-2xl">
-                        <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
+                        <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
                         <div className="flex-1 space-y-2">
                           <Skeleton className="h-5 w-32" />
                           <Skeleton className="h-4 w-20" />
@@ -241,7 +241,7 @@ export default function CategoriesPage() {
                   </div>
                 ) : categories.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center mb-4 shadow-lg">
+                    <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-100 to-indigo-100 flex items-center justify-center mb-4 shadow-lg">
                       <Folder className="h-10 w-10 text-blue-600" />
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-2">
@@ -250,7 +250,7 @@ export default function CategoriesPage() {
                     <p className="text-sm text-gray-600 mb-6 max-w-sm">
                       Tambahkan kategori untuk mengorganisir transaksi pemasukan dan pengeluaran Anda
                     </p>
-                    <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
+                    <Button asChild className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg">
                       <Link href="/categories/new">
                         <Plus className="h-4 w-4 mr-2" />
                         Tambah Kategori
@@ -271,7 +271,7 @@ export default function CategoriesPage() {
                           <div className="flex items-start gap-3 p-4">
                             {/* Icon with Color */}
                             <div
-                              className="flex items-center justify-center w-12 h-12 rounded-xl text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 flex-shrink-0"
+                              className="flex items-center justify-center w-12 h-12 rounded-xl text-2xl shadow-md group-hover:scale-110 transition-transform duration-300 shrink-0"
                               style={{
                                 background: `linear-gradient(135deg, ${categoryColor}dd, ${categoryColor})`
                               }}
